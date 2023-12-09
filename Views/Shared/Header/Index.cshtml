@@ -1,0 +1,126 @@
+﻿<div class="iq-top-navbar w-100">
+	<div class="iq-navbar-custom">
+		<nav class="navbar navbar-expand-lg navbar-light p-0" style="height: 73px;">
+			<div class="iq-search-bar device-search">
+				<div action="#" class="searchbox m-0" style="width: 300px;">
+					<a class="search-link" href="#"><i class="ri-search-line"></i></a>
+					<input id="search" type="text" class="text search-input" placeholder="Search here..." />
+				</div>
+			</div>
+
+			<div class="d-flex justify-content-between">
+				<a href="/products" class="btn text-uppercase btn-md mx-2">Products</a>
+				<a href="/collections" class="btn text-uppercase btn-md mx-2">Collections</a>
+				<a href="/accounts" class="btn text-uppercase btn-md mx-2">Accounts</a>
+				<a href="/sales" class="btn text-uppercase btn-md mx-2">Sales</a>
+				<a href="/orders" class="btn text-uppercase btn-md mx-2">Orders</a>
+				<a href="/customers" class="btn text-uppercase btn-md mx-2">Customers</a>
+				<a href="/report" class="btn text-uppercase btn-md mx-2">Report</a>
+
+			</div>
+
+			<div class="d-flex align-items-center">
+				<button class="navbar-toggler"
+						type="button"
+						data-toggle="collapse"
+						data-target="#navbarSupportedContent"
+						aria-controls="navbarSupportedContent"
+						aria-label="Toggle navigation">
+					<i class="ri-menu-3-line"></i>
+				</button>
+				<div class="collapse navbar-collapse" id="navbarSupportedContent">
+					<ul class="navbar-nav ml-auto navbar-list align-items-center">
+						<li>
+							<button id="new-order"
+									type="button"
+									class="btn border add-btn shadow-none mx-2 d-none d-md-block"
+									data-toggle="modal"
+									data-target="#newOrder">
+								<i class="las la-plus mr-2"></i>New Order
+							</button>
+						</li>
+						<li class="nav-item nav-icon search-content">
+							<a href="#"
+							   class="search-toggle rounded"
+							   id="dropdownSearch"
+							   data-toggle="dropdown"
+							   aria-haspopup="true"
+							   aria-expanded="false">
+								<i class="ri-search-line"></i>
+							</a>
+							<div class="iq-search-bar iq-sub-dropdown dropdown-menu" aria-labelledby="dropdownSearch">
+								<form action="#" class="searchbox p-2">
+									<div class="form-group mb-0 position-relative">
+										<input type="text"
+											   class="text search-input font-size-12"
+											   placeholder="type here to search..." />
+										<a href="#" class="search-link"><i class="las la-search"></i></a>
+									</div>
+								</form>
+							</div>
+						</li>
+						<li class="nav-item nav-icon dropdown caption-content">
+							<a href="#" class="search-toggle dropdown-toggle" id="dropdownMenuButton4" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								<img src="~/images/user/1.png" class="img-fluid" alt="user" style="border-radius: 50%; border:1px solid #dedbd2" />
+							</a>
+							<div class="iq-sub-dropdown dropdown-menu" aria-labelledby="dropdownMenuButton">
+								<div class="card shadow-none m-0">
+									<div class="card-body p-0 text-center">
+										<div class="media-body profile-detail text-center">
+											<img src="/images/page-img/profile-bg.jpg"
+												 alt="profile-bg"
+												 class="rounded-top img-fluid mb-4"/>
+											<img src="~/images/user/1.png" class="rounded profile-img img-fluid avatar-70" />
+										</div>
+										<div class="p-3">
+											<h5 class="mb-1">email@gmail.com</h5>
+											<p class="mb-0">Since 10 march, 2020</p>
+											<div class="d-flex align-items-center justify-content-center mt-3">
+												<a href="/accounts/profile/" class="btn border mr-2">Profile</a>
+												<a href="/auth/logout" class="btn border">Sign Out</a>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+	</div>
+</div>
+
+<div class="modal fade" id="newOrder" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-body">
+				<div class="popup text-left">
+					<h4 class="mb-3">New Order</h4>
+					<div class="content create-workform bg-body">
+						<div class="d-flex align-items-center mb-2">
+							<lable class="col-3" for="phoneNumber">Phone No:</lable>
+							<input type="text"
+								   id="phoneNumber"
+								   class="form-control"
+								   onkeyup="handleGetCusInfoDebounced(this)" />
+						</div>
+						<div class="d-flex align-items-center mb-2">
+							<lable class="col-3" for="name">Name:</lable>
+							<input type="text" id="name" class="form-control" />
+						</div>
+						<div class="d-flex align-items-center mb-2">
+							<lable class="col-3" for="address">Address:</lable>
+							<input type="text" id="address" class="form-control" />
+						</div>
+						<div class="col-lg-12 mt-4">
+							<div class="d-flex flex-wrap align-items-ceter justify-content-center">
+								<div class="btn btn-primary mr-4" data-dismiss="modal">Close</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
