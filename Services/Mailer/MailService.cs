@@ -42,12 +42,7 @@ namespace pos.Services.Mailer
                         EnableSsl = true,
                         Credentials = new NetworkCredential(_mailSettings.UserName, _mailSettings.Password)
                     })
-                    {
-                        //mailClient.Connect(_mailSettings.Server, _mailSettings.Port, MailKit.Security.SecureSocketOptions.StartTls);
-                        //mailClient.Authenticate(_mailSettings.UserName, _mailSettings.Password);
-                        //mailClient.Send(emailMessage);
-                        //mailClient.Disconnect(true);
-                    }
+                    
                 }
 
                 return true;
