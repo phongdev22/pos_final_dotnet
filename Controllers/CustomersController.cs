@@ -104,19 +104,27 @@ namespace pos.Controllers
 			return View(customer);
 		}
 
-		//[HttpGet("phone")]
-		//[Produces("application/json")]
-		//public async Task<IActionResult> GetByPhone(string phone)
-		//{
-		//	var customer = await _context.Customer.FirstOrDefaultAsync(cus => cus.PhoneNumber.Equals(phone));
+		[HttpGet]
+		public async Task<IActionResult> Search([FromQuery] string keyword)
+		{
+			var customer = await _context.Customer.Where(c => c.PhoneNumber.Equals(keyword)).FirstOrDefaultAsync();
 
-		//	if (customer == null)
-		//	{
-		//		return NotFound();
-		//	}
+			if (customer == null)
+			{
+				return Ok(new { code = 1, message = "Not Found!" });
+			}
 
-		//	return Ok(customer);
-		//}
+			return Ok(new
+			{
+				code = 0,
+				customer = new
+				{
+					customer.Id,
+					customer.Name,
+					customer.Address,
+				}
+			});
+		}
 
 		private bool CustomerExists(int id)
 		{

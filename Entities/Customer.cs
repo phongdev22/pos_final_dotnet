@@ -12,7 +12,6 @@ namespace pos.Entities
 		public string PhoneNumber { get; set; }
 		[Required]
 		public string Address { get; set; }
-
 		public virtual ICollection<Order>? Orders { get; set; }
 	}
 }

@@ -43,7 +43,12 @@ document.querySelector("#checkoutButton").addEventListener("click", function () 
         })
             .then((response) => response.json())
             .then((data) => {
-                window.location.href = data.returnUrl;
+                if (data.code == 0) {
+                    localStorage.setItem("cart", JSON.stringify([]));
+                    window.location.href = data.returnUrl;
+                    return;
+                }
+                alert(data.message);
             });
     } else {
         alert("Không có dữ liệu giỏ hàng.");
@@ -182,11 +187,12 @@ function debounce(func, delay) {
 }
 
 async function getCusInfo(inputField) {
-    const url = window.location.origin + "/customers/get/";
+    const url = window.location.origin + "/customers/search?keyword=";
     const phone = inputField.value;
     if (phone) {
         await fetch(url + phone).then(async (res) => {
             const data = await res.json();
+            console.log(data)
             if (data.code === 0) {
                 document.querySelector("#name").value = data.customer.name;
                 document.querySelector("#address").value = data.customer.address;
