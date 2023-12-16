@@ -156,7 +156,6 @@ namespace pos.Controllers
 
 				if (!result.Succeeded)
 				{
-					
 					return RedirectToAction("Index");
 				}
 			}

@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Crypto.Macs;
 using pos.Entities;
+using static Org.BouncyCastle.Asn1.Cmp.Challenge;
 
 namespace pos.Config
 {
@@ -70,11 +72,30 @@ namespace pos.Config
 
 		public void SeedingData(ModelBuilder builder)
 		{
+			// ROLE
 			builder.Entity<IdentityRole>().HasData(
 				new IdentityRole() { Name = "Admin", ConcurrencyStamp = "1", NormalizedName = "Admin" },
 				new IdentityRole() { Name = "Manager", ConcurrencyStamp = "1", NormalizedName = "Manager" },
 				new IdentityRole() { Name = "Employee", ConcurrencyStamp = "1", NormalizedName = "Employee" }
 			);
+
+			// USER
+			var appUser = new ApplicationUser
+			{
+				FullName = "Phong Van",
+				Email = "admin@gmail.com",
+				EmailConfirmed = true,
+				UserName = "admin",
+				NormalizedUserName = "admin",
+				Gender = true,
+				PhoneNumber = "0000000000",
+				Active = true,
+				FirstLogin = false
+			};
+			PasswordHasher<ApplicationUser> hashedPassword = new PasswordHasher<ApplicationUser>();
+			appUser.PasswordHash = hashedPassword.HashPassword(appUser, "admin");
+
+			builder.Entity<ApplicationUser>().HasData(appUser);
 		}
 	}
 }
