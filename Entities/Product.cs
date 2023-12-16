@@ -10,7 +10,7 @@ namespace pos.Entities
 		public required decimal Cost { get; set; }
 		public required string Barcode { get; set; }
 		public required int Quantity { get; set; }
-		public string ImagePath { get; set; } = "~/iamges/defaut/product/no-image.png";
+		public string ImagePath { get; set; } = "/images/default/product/no-image.png";
 		public bool isDelete { get; set; } = true;
 
 		[ForeignKey("Category")]

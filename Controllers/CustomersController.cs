@@ -35,7 +35,7 @@ namespace pos.Controllers
 				return NotFound();
 			}
 
-			return View(customer);
+			return Ok(customer);
 		}
 
 		// GET: Customers/Create
@@ -104,38 +104,19 @@ namespace pos.Controllers
 			return View(customer);
 		}
 
-		// GET: Customers/Delete/5
-		public async Task<IActionResult> Delete(int? id)
-		{
-			if (id == null)
-			{
-				return NotFound();
-			}
+		//[HttpGet("phone")]
+		//[Produces("application/json")]
+		//public async Task<IActionResult> GetByPhone(string phone)
+		//{
+		//	var customer = await _context.Customer.FirstOrDefaultAsync(cus => cus.PhoneNumber.Equals(phone));
 
-			var customer = await _context.Customer
-				.FirstOrDefaultAsync(m => m.Id == id);
-			if (customer == null)
-			{
-				return NotFound();
-			}
+		//	if (customer == null)
+		//	{
+		//		return NotFound();
+		//	}
 
-			return View(customer);
-		}
-
-		// POST: Customers/Delete/5
-		[HttpPost, ActionName("Delete")]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> DeleteConfirmed(int id)
-		{
-			var customer = await _context.Customer.FindAsync(id);
-			if (customer != null)
-			{
-				_context.Customer.Remove(customer);
-			}
-
-			await _context.SaveChangesAsync();
-			return RedirectToAction(nameof(Index));
-		}
+		//	return Ok(customer);
+		//}
 
 		private bool CustomerExists(int id)
 		{

@@ -8,9 +8,11 @@ namespace pos.Entities
 		[Required]
 		public string OrderId { get; set; }
 		public decimal Total { get; set; }
+		// public DateTime DateCreation { get; set; }
 		public virtual Customer Customer { get; set; }
 		public virtual ApplicationUser User { get; set; }
 		public virtual ICollection<OrderDetail> OrderDetails { get; set; }
 		public virtual RetailStore RetailStore { get; set; }
+		
 	}
 }

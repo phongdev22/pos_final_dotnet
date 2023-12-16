@@ -2,7 +2,7 @@
 
 namespace pos.Models.Authencation
 {
-	public class LoginView
+	public class LoginModel
 	{
 		[Required(ErrorMessage = "User Name is required")]
 		public string Username { get; set; }

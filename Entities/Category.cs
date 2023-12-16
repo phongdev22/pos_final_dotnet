@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace pos.Entities
 {
@@ -8,6 +9,8 @@ namespace pos.Entities
 
 		[Required]
 		public string Name { get; set; }
+
+		[JsonIgnore]
 		public virtual ICollection<Product>? Products { get; set; }
 	}
 }

@@ -13,9 +13,14 @@ namespace pos.Config
 		public DbSet<Order> Orders { get; set; }
 		public DbSet<OrderDetail> OrderDetails { get; set; }
 		public DbSet<RetailStore> RetailStores { get; set; }
+		public DbSet<Inventory> Inventory { get; set; } = default!;
+
+
+		private readonly UserManager<ApplicationUser> _userManager;
 
 		public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
 		{
+			//_userManager = userManager;
 		}
 
 		protected override void OnModelCreating(ModelBuilder builder)
@@ -54,33 +59,22 @@ namespace pos.Config
 				.HasForeignKey(inv => inv.RetailStoreId)
 				.OnDelete(DeleteBehavior.Cascade);
 
+			builder.Entity<RetailStore>()
+				.HasMany(rt => rt.AppUsers)
+				.WithOne(us => us.RetailStore)
+				.HasForeignKey(us => us.RetailStoreId)
+				.OnDelete(DeleteBehavior.Cascade);
 
 			SeedingData(builder);
 		}
 
-		public static void SeedingData(ModelBuilder builder)
+		public void SeedingData(ModelBuilder builder)
 		{
-			string hashedPassword = BCrypt.Net.BCrypt.HashPassword("admin", 10);
-
 			builder.Entity<IdentityRole>().HasData(
 				new IdentityRole() { Name = "Admin", ConcurrencyStamp = "1", NormalizedName = "Admin" },
-				new IdentityRole() { Name = "Manager", ConcurrencyStamp = "1", NormalizedName = "Employee" }
-			);
-
-			builder.Entity<ApplicationUser>().HasData(
-				new ApplicationUser()
-				{
-					UserName = "admin",
-					NormalizedUserName = "admin",
-					Email = "admin@gmail.com",
-					NormalizedEmail = "admin@gmail.com",
-					PasswordHash = hashedPassword,
-					Active = true,
-					FirstLogin = false,
-					EmailConfirmed = true,
-				}
+				new IdentityRole() { Name = "Manager", ConcurrencyStamp = "1", NormalizedName = "Manager" },
+				new IdentityRole() { Name = "Employee", ConcurrencyStamp = "1", NormalizedName = "Employee" }
 			);
 		}
-		public DbSet<pos.Entities.Inventory> Inventory { get; set; } = default!;
 	}
 }

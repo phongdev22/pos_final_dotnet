@@ -25,7 +25,7 @@
 				<table class="data-table table mb-0 tbl-server-info">
 					<thead class="bg-white text-uppercase">
 						<tr class="ligth ligth-data">
-							<th class="col-lg-2 text-left">Code</th>
+							<th class="col-lg-1 text-left">Code</th>
 							<th class="col-lg-2 text-left">Product</th>
 							<th>Price</th>
 							<th>Cost</th>
@@ -38,10 +38,10 @@
 						@foreach (var product in Model.Items)
 						{
 							<tr id="data-@product.Id">
-								<td class="text-left">@product.Barcode</td>
+								<td class="text-left text-truncate">@product.Barcode</td>
 								<td>@product.Name</td>
-								<td>@product.Price</td>
-								<td>@product.Cost</td>
+								<td>@product.Price.ToString("N0").Replace(",",".")đ</td>
+								<td>@product.Cost.ToString("N0").Replace(",", ".")đ</td>
 								<td>@product.Quantity</td>
 								<td class="text-capitalize">@(product.Category != null ? product.Category.Name : "N/A")</td>
 								<td>
@@ -96,7 +96,6 @@
 		</ul>
 	</nav>
 </div>
-
 
 @section Scripts {
 	<script>

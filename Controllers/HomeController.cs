@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using pos.Config;
+using pos.Entities;
 using pos.Models;
+using pos.Models.Product;
 using System.Diagnostics;
 
 namespace pos.Controllers
@@ -17,24 +19,18 @@ namespace pos.Controllers
 		}
 
 		[Authorize]
-		public async Task<IActionResult> Index()
+		public  IActionResult Index([FromQuery]string collection)
 		{
+			var categories = _context.Categories.ToList();
+			ViewBag.Categories = categories;
 
-			var authenticationResult = await HttpContext.AuthenticateAsync();
-			var token = authenticationResult?.Properties?.GetTokenValue("access_token");
-
-			return View();
-		}
-		[Authorize]
-		public IActionResult Privacy()
-		{
-			return View();
-		}
-
-		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-		public IActionResult Error()
-		{
-			return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+			if (collection != null)
+			{
+				var productsCollection = _context.Products.Where(p => p.Category.Name.Equals(collection)).ToList();
+				return View(productsCollection);
+			}
+			var products = _context.Products.ToList();
+			return View(products);
 		}
 	}
 }

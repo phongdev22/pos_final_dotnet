@@ -30,7 +30,6 @@ namespace pos.Controllers
 					.Take(PageSize)
 					.ToList();
 
-			// var products = _context.Products.ToList();
 			ViewBag.Store = store;
 			ViewBag.Stores = retailStores;
 
@@ -38,6 +37,36 @@ namespace pos.Controllers
 
 			return View(Page);
 		}
+
+		// SEARCH
+
+		public async Task<IActionResult> Search([FromQuery] string keyword)
+		{
+			var products = _context.Products.AsNoTracking()
+				.Where(p => p.Barcode.Equals(keyword) || p.Name.Contains(keyword))
+				.ToList();
+
+			var data = new List<ProductSearchResponse>();
+
+			foreach (var product in products)
+			{
+				if(product.Inventories.Any(inv => inv.Quantity > 0))
+				{
+					data.Add(new ProductSearchResponse()
+					{
+						Id = product.Id.ToString(),
+						Name = product.Name,
+						Barcode = product.Barcode,
+						Price = product.Price,
+						ImagePath = product.ImagePath,
+						Quantity = product.Quantity,
+					});
+				}
+			}
+			
+			return Ok(data);
+		}
+
 
 		// CREATE
 		public IActionResult Create()
@@ -66,25 +95,25 @@ namespace pos.Controllers
 		}
 
 		// EDIT
-		public IActionResult Edit(int? id, [FromQuery]int store)
+		public IActionResult Edit(int? id, [FromQuery] int store)
 		{
 			ViewData["Title"] = "POS | Edit Product";
-			
-			var retailStore = _context.RetailStores.FirstOrDefault(rs=>rs.Id==store);
+
+			var retailStore = _context.RetailStores.FirstOrDefault(rs => rs.Id == store);
 			var Categories = _context.Categories.ToList();
 			var product = _context.Products.FirstOrDefault(x => x.Id == id);
 
 			ViewBag.Store = retailStore;
-			
+
 			return View(new ProductModel() { Product = product, Categories = Categories });
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Edit(int id, Product product, int categoryId, [FromQuery]int store)
+		public async Task<IActionResult> Edit(int id, Product product, int categoryId, [FromQuery] int store)
 		{
 			var _product = await _context.Products.FindAsync(id);
 
-			if(_product != null)
+			if (_product != null)
 			{
 				_product.Name = product.Name;
 				_product.Price = product.Price;
@@ -94,11 +123,11 @@ namespace pos.Controllers
 				_product.Quantity = product.Quantity;
 
 				var inventory = await _context.Inventory.FirstOrDefaultAsync(inv => inv.ProductId == id && inv.RetailStoreId == store);
-				if(inventory != null)
+				if (inventory != null)
 				{
 					inventory.Quantity = product.Quantity;
 				}
-				
+
 				// Process image file
 
 			}

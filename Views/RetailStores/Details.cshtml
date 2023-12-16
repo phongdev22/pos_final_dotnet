@@ -1,30 +1,176 @@
-﻿@model pos.Entities.RetailStore
+﻿@model pos.Models.Store.DetailStoreModel
 
 @{
-    ViewData["Title"] = "Details";
+	ViewData["Title"] = "POS | Detail Store";
 }
 
-<h1>Details</h1>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-lg-4">
+			<div class="card card-transparent card-block card-stretch card-height border-none">
+				<div class="card-body p-0 mt-lg-2 mt-0">
+					<h3 class="mb-3 text-capitalize">Hi {{user.fullName}}, {{greeting}}</h3>
+					<p class="mb-0 mr-4">
+						Your dashboard gives you views of key performance or business process.
+					</p>
+					<a asp-action="Index" class="btn p-0">Back to list.</a>
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-8">
+			<div class="row">
+				<div class="col-lg-4 col-md-4">
+					<div class="card card-block card-stretch card-height">
+						<div class="card-body">
+							<div class="d-flex align-items-center mb-4 card-total-sale">
+								<div>
+									<p class="mb-2">Total Sales</p>
+									<h4>@Model.Orders.Count()</h4>
+								</div>
+							</div>
+							<div class="iq-progress-bar mt-2">
+								<span class="bg-info iq-progress progress-1" data-percent="50"> </span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-4 col-md-4">
+					<div class="card card-block card-stretch card-height">
+						<div class="card-body">
+							<div class="d-flex align-items-center mb-4 card-total-sale">
+								<div>
+									<p class="mb-2">Total Revenue</p>
+									<h4>@Model.TotalRevenuePerStore</h4>
+								</div>
+							</div>
+							<div class="iq-progress-bar mt-2">
+								<span class="bg-danger iq-progress progress-1" data-percent="70"> </span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-4 col-md-4">
+					<div class="card card-block card-stretch card-height">
+						<div class="card-body">
+							<div class="d-flex align-items-center mb-4 card-total-sale">
+								<div>
+									<p class="mb-2">Product Sold</p>
+									<h4>@Model.TotalProductsSold</h4>
+								</div>
+							</div>
+							<div class="iq-progress-bar mt-2">
+								<span class="bg-success iq-progress progress-1" data-percent="75"> </span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 
-<div>
-    <h4>RetailStore</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.StoreName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.StoreName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Location)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Location)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+	@* List order *@
+	<div class="row">
+		<div class="col-lg-12">
+			<div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
+				<div>
+					<h4 class="mb-3">List Order</h4>
+				</div>
+			</div>
+			<div class="col-lg-12">
+				<div class="table-responsive rounded">
+					<table class="data-table table mb-0 tbl-server-info">
+						<thead class="bg-white text-uppercase">
+							<tr class="ligth ligth-data">
+								<th>Invoice Id</th>
+								<th>Date</th>
+								<th>Customer</th>
+								<th>Total</th>
+								<th>Customer Money</th>
+								<th>Return Back</th>
+								<th>Biller</th>
+								<th>Detail</th>
+							</tr>
+						</thead>
+						<tbody class="ligth-body">
+							@foreach (var order in Model.Orders)
+							{
+								<tr>
+									<td class="text text-truncate"
+										style="max-width:40px"
+										data-toggle="tooltip"
+										data-placement="top"
+										data-original-title="@order.OrderId">
+										@order.OrderId
+									</td>
+									<td>{{convertDateTime this.createdAt}}</td>
+									<td>@order.Customer.Name</td>
+									<td>@order.Total.ToString("N0") đ</td>
+									<td>{{convertVND this.customerMoney}}</td>
+									<td>@order.User.NormalizedUserName</td>
+									<td>@order.User.NormalizedUserName</td>
+									<td class="text-center">
+										<a class="btn btn-sm badge badge-info mr-2"
+										   data-toggle="tooltip"
+										   data-placement="top"
+										   title=""
+										   data-original-title="View"
+										   href="#">
+											<i class="ri-eye-line mr-0"></i>
+										</a>
+										@* <div class="d-flex align-items-center list-action">
+									<button data-toggle="tooltip"
+									data-placement="top"
+									data-original-title="Delete"
+									onclick="handleDelete(this)"
+									class="btn btn-sm badge bg-warning mr-2"
+									data-name="{{this._id}}"
+									data-id="{{this._id}}">
+									<i class="ri-delete-bin-line mr-0"></i>
+									</button>
+									</div> *@
+									</td>
+								</tr>
+							}
+							<tr>
+								<td class="text text-truncate"
+									style="max-width:40px"
+									data-toggle="tooltip"
+									data-placement="top"
+									data-original-title="Test Order 1">
+									Test Order 1
+								</td>
+								<td>{{convertDateTime this.createdAt}}</td>
+								<td>Test Order 1</td>
+								<td>Test Order 1 đ</td>
+								<td>{{convertVND this.customerMoney}}</td>
+								<td>Test Order 1</td>
+								<td>Test Order 1</td>
+								<td>
+									<a class="btn btn-sm badge badge-info"
+									   data-toggle="tooltip"
+									   data-placement="top"
+									   title=""
+									   data-original-title="View"
+									   href="#">
+										<i class="ri-eye-line mr-0"></i>
+									</a>
+									@* <div class="d-flex align-items-center list-action">
+									<button data-toggle="tooltip"
+									data-placement="top"
+									data-original-title="Delete"
+									onclick="handleDelete(this)"
+									class="btn btn-sm badge bg-warning mr-2"
+									data-name="{{this._id}}"
+									data-id="{{this._id}}">
+									<i class="ri-delete-bin-line mr-0"></i>
+									</button>
+									</div> *@
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>

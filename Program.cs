@@ -37,6 +37,11 @@ namespace pos
 				.AddEntityFrameworkStores<ApplicationDbContext>()
 				.AddDefaultTokenProviders();
 
+			builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+			{
+				options.TokenLifespan = TimeSpan.FromMinutes(1);
+			});
+
 			builder.Services.AddAuthentication(options =>
 			{
 				options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -53,7 +58,7 @@ namespace pos
 					options.SlidingExpiration = true;
 				});
 
-			builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddDebug());
+			// builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddDebug());
 
 			builder.Services.AddAuthorization();
 
