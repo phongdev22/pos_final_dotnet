@@ -41,7 +41,8 @@ namespace pos.Services.Mailer
                     {
                         EnableSsl = true,
                         Credentials = new NetworkCredential(_mailSettings.UserName, _mailSettings.Password)
-                    });
+                    })
+                    
                 }
 
                 return true;
