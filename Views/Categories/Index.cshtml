@@ -1,0 +1,59 @@
+﻿@model IEnumerable<pos.Entities.Category>
+
+@{
+	ViewData["Title"] = "Index";
+}
+
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-sm-12 col-lg-12">
+			<div class="card">
+				<div class="card-header d-flex justify-content-between">
+					<div class="header-title">
+						<h4 class="card-title">Collections</h4>
+					</div>
+					<a asp-action="Create" class="btn btn-primary btn-add">
+						Add New Collection
+					</a>
+				</div>
+				<div class="card-body">
+					<table class="table">
+						<thead>
+							<tr class="ligth">
+								<th scope="col" class="col-lg-1">#</th>
+								<th scope="col" class="col-lg-4">Name</th>
+								<th scope="col" class="col-lg-3">Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							@{
+								int counter = 1;
+								@foreach (var item in Model)
+								{
+									<tr>
+										<td>@counter</td>
+										<td scope="row">
+											@Html.DisplayFor(modelItem => item.Name)
+										</td>
+										<td>
+											<a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm badge bg-primary mr-2">
+												<i class="ri-eye-line mr-0"></i>
+											</a>
+											<a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm badge bg-success mr-2">
+												<i class="ri-pencil-line mr-0"></i>
+											</a>
+											<a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm badge bg-warning mr-2">
+												<i class="ri-delete-bin-line mr-0"></i>
+											</a>
+										</td>
+									</tr>
+									counter++;
+								}
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

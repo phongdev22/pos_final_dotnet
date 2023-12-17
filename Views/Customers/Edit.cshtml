@@ -1,0 +1,60 @@
+﻿@model pos.Entities.Customer
+
+@{
+    ViewData["Title"] = "POS | Edit Customer";
+}
+
+<div class="container-fluid add-form-list">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
+                <a asp-action="Index" class="btn">Back To List</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <div class="header-title">
+                    <h4 class="card-title">Edit Customer</h4>
+                </div>
+            </div>
+            <div class="card-body">
+                <form method="post" data-toggle="validator" asp-action="Edit">
+                    <input type="text" name="cusId" hidden value="" />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for ="Name">Name *</label>
+                                <input asp-for="Name" type="text" class="form-control" required />
+                                <div class="help-block with-errors"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="PhoneNumber">Phone Number *</label>
+                                <input asp-for ="PhoneNumber"
+                                       type="text"
+                                       class="form-control"
+                                       pattern="[0-9]{10}"
+                                       title="Phone number must be exactly 10 digits."
+                                       required />
+                                <div class="help-block with-errors"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label asp-for="Address">Address</label>
+                                <input asp-for="Address"
+                                       type="text"
+                                       class="form-control text-uppercase"
+                                       rows="4"/>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary mr-2">Update Customer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
