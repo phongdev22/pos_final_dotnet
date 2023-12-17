@@ -1,0 +1,141 @@
+﻿@using pos.Entities
+@model pos.Models.PageViewModel<ApplicationUser>
+@{
+	ViewData["Title"] = "POS | List Account";
+}
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="card">
+				<div class="card-header d-flex justify-content-between">
+					<div class="header-title">
+						<h4 class="card-title">User List</h4>
+					</div>
+				</div>
+				<div class="card-body">
+					<div class="table-responsive">
+						<div class="row justify-content-between">
+							<div class="col-sm-6 col-md-6">
+								<div id="user_list_datatable_info" class="dataTables_filter">
+									<form class="mr-3 position-relative">
+										<div class="form-group mb-0">
+											<input type="search" class="form-control" id="exampleInputSearch" placeholder="Search" aria-controls="user-list-table" />
+										</div>
+									</form>
+								</div>
+							</div>
+							<div class="col-sm-6 col-md-6">
+								<div class="user-list-files d-flex">
+									<a class="bg-primary" href="/accounts/create">
+										Create Account
+									</a>
+								</div>
+							</div>
+						</div>
+
+						<style>
+							.btnStatus {
+								cursor: pointer;
+							}
+						</style>
+
+						<table id="user-list-table" class="table table-striped dataTable mt-4" role="grid" aria-describedby="user-list-page-info">
+							<thead>
+								<tr class="ligth">
+									<th>Profile</th>
+									<th>Name</th>
+									<th>Contact</th>
+									<th>Email</th>
+									<th>Status</th>
+									<th style="min-width: 100px">Action</th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (var account in Model.Items)
+								{
+									<tr id="data-@account.Id">
+										<td class="text-center"><img class="rounded img-fluid avatar-40" src="/images/user/01.jpg" alt="profile" /></td>
+										<td>@account.UserName</td>
+										<td>@account.PhoneNumber</td>
+										<td>@account.Email</td>
+										<td onclick="handleUpdateStatus(event)" data-username="@account.Id">
+											<span class="btnStatus badge bg-success">Active</span>
+										</td>
+										<td>
+											<div class="flex align-items-center list-user-action">
+												@if (!account.EmailConfirmed)
+												{
+													<button onclick="handleResend(this)"
+															class="btn btn-sm bg-primary"
+															data-link="@Url.RouteUrl(new { controller = "Auth", action = "Resend", id = account.Id })"
+															data-toggle="tooltip"
+															data-placement="top"
+															title="" data-original-title="Resend link">
+														<i class="ri-mail-line mr-0"></i>
+													</button>
+												}
+
+												<a class="btn btn-sm bg-primary" data-toggle="tooltip" data-placement="top" title="" data-original-title="Edit" asp-action="Edit" asp-route-id="@account.Id">
+													<i class="ri-pencil-line mr-0"></i>
+												</a>
+
+												<button onclick="handleDelete(this)" class="btn btn-sm bg-primary" data-name="@account.UserName" data-id="@account.Id">
+													<i class="ri-delete-bin-line mr-0"></i>
+												</button>
+											</div>
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+					<div class="row justify-content-between mt-3">
+						<div id="user-list-page-info" class="col-md-6">
+							<span>Showing 1 to 5 of 5 entries</span>
+						</div>
+						<div class="col-md-6">
+							<nav aria-label="Page navigation example">
+								<ul class="pagination justify-content-end mb-0">
+									<li class="">
+										<a class="page-link" href="@(Model.PageNumber == 1 ? "#" : $"?page={Model.PageNumber - 1}")" tabindex="-1">Previous</a>
+									</li>
+									@{
+										for (var i = 1; i <= Model.TotalPages; i++)
+										{
+												<li class=""><a class="page-link" href="?&page=@i">@i</a></li>
+										}
+									}
+									<li class="">
+										<a class="page-link" href="?page=@(Model.PageNumber + 1)">Next</a>
+									</li>
+								</ul>
+							</nav>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	<script src="/js/changeStatus.js"></script>
+	<script>
+		async function handleResend(button) {
+			const { link } = button.dataset;
+			const host = window.origin;
+			try {
+				const response = await fetch(`${host}${link}`, { method: "GET" });
+
+				if (response.ok) {
+					alert("Resend successful!");
+				} else {
+					alert(`Request failed with status: ${response.status}`);
+				}
+			} catch (error) {
+				console.error(error);
+				alert("An error occurred during the fetch.");
+			}
+		}
+	</script>
+}
