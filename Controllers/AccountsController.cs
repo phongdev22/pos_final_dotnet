@@ -19,6 +19,7 @@ namespace pos.Controllers
 		private readonly RoleManager<IdentityRole> _roleManager;
 		private readonly IConfiguration _configuration;
 		private List<IdentityRole> _roles;
+		private List<RetailStore> _stores;
 
 		private int PageSize = 10;
 
@@ -29,6 +30,7 @@ namespace pos.Controllers
 			_roleManager = roleManager;
 			_configuration = configuration;
 			_roles = _roleManager.Roles.Where(r => r.Name != "Admin").ToList();
+			_stores = _context.RetailStores.ToList();
 		}
 
 		public async Task<IActionResult> Index(int page = 1, [FromQuery] int store = 1)
@@ -47,8 +49,7 @@ namespace pos.Controllers
 
 		public IActionResult Create()
 		{
-			var ratailStores = _context.RetailStores.ToList();
-
+			ViewBag.Stores = _stores;
 			ViewBag.Roles = _roles;
 			return View();
 		}
@@ -115,6 +116,8 @@ namespace pos.Controllers
 		public async Task<IActionResult> Edit(string id)
 		{
 			ViewBag.Roles = _roles;
+			ViewBag.Stores = _stores;
+
 
 			if (id == null)
 			{
@@ -172,6 +175,18 @@ namespace pos.Controllers
 			
 			return RedirectToAction("Edit");
 		}
+		
+		[HttpDelete]
+		public async Task<IActionResult> Delete(string id)
+		{
+			var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null) return Ok(new { code = 1, Message = "Not found!" });
+			await _userManager.DeleteAsync(user);
+
+            return Ok(new { code = 0, Message = "Success" });
+        }
+		
 		private async Task UpdateUserRoles(ApplicationUser user, string[] roles)
 		{
 			var existingRoles = await _userManager.GetRolesAsync(user);

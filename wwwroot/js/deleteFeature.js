@@ -3,15 +3,15 @@ async function handleDelete(button) {
    const { origin, pathname } = window.location;
    const isConfirmed = confirm(`Are you sure you want to delete item: ${name} ?`);
    if (isConfirmed) {
-      await fetch(`${origin}${pathname}/${id}`, { method: "DELETE" })
+       await fetch(`${origin}${pathname}/delete/${id}`, { method: "DELETE" })
          .then(async (res) => {
             const result = await res.json();
             if (result.code === 0) {
-               alert(`Delete product ${result?.data._id} successfully.`);
+                alert(`Delete ${name} successfully.`);
                document.querySelector(`#data-${id}`).remove();
             }
             if (result.code === 1) {
-               alert(`${result.data.message}`);
+               alert(`${result.message}`);
             }
          })
          .catch((error) => console.log(error));

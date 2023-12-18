@@ -17,8 +17,8 @@ namespace pos
 			// Add services to the container.
 			builder.Services.AddControllersWithViews();
 
-			// DB Configuration
-			builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            // DB Configuration
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
 			{
 				options.UseLazyLoadingProxies().UseSqlServer(configration.GetConnectionString("posSystemDB"));
 			});
@@ -47,8 +47,8 @@ namespace pos
 				options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 				options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 				options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-			})
-				.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+
+			}).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
 				{
 					options.LoginPath = "/Auth"; // Đường dẫn đăng nhập của bạn
 					options.LogoutPath = "/Auth/Logout";

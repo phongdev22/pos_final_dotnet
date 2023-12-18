@@ -15,7 +15,7 @@
 				<a href="/Accounts" class="btn text-uppercase btn-md mx-2">Accounts</a>
 @* 				<a href="/Orders" class="btn text-uppercase btn-md mx-2">Orders</a> *@
 				<a href="/Customers" class="btn text-uppercase btn-md mx-2">Customers</a>
-				<a href="/Report" class="btn text-uppercase btn-md mx-2">Report</a>
+				<a href="/Orders" class="btn text-uppercase btn-md mx-2">Orders</a>
 				<a href="/RetailStores" class="btn text-uppercase btn-md mx-2">Stores</a>
 			</div>
 
@@ -115,7 +115,8 @@
 						</div>
 						<div class="col-lg-12 mt-4">
 							<div class="d-flex flex-wrap align-items-ceter justify-content-center">
-								<div class="btn btn-primary mr-4" data-dismiss="modal">Close</div>
+								<a id="history" target="_blank" class="btn btn-success text-white disabled mx-2">View History</a>
+								<div class="btn btn-primary mr-4" onclick="checkout()">Check Out</div>
 							</div>
 						</div>
 					</div>

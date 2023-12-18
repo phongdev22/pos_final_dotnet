@@ -1,41 +1,89 @@
 ﻿@model IEnumerable<pos.Entities.Order>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "POS | List Order";
 }
 
-<h1>Index</h1>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
+                <div>
+                    <h4 class="mb-3">List Order</h4>
+                </div>
+                <a href="/" class="btn">Back To Sales</a>
+            </div>
+            <div class="col-lg-12">
+                <div class="table-responsive rounded mb-3">
+                    <table class="data-table table mb-0 tbl-server-info">
+                        <thead class="bg-white text-uppercase">
+                            <tr class="ligth ligth-data">
+                                <th>Invoice Id</th>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Total</th>
+                                <th>Customer Money</th>
+                                <th>Return Back</th>
+                                <th>Status</th>
+                                <th>Biller</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="ligth-body">
+                            @foreach (var item in Model)
+                            {
+                                <tr id="data-@item.Id">
+                                    <td class="text text-truncate"
+                                        style="max-width:40px"
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        data-original-title="@item.OrderId">
+                                        @item.OrderId
+                                    </td>
+                                    <td>@item.DateCreation.ToString("dd-MM-yyyy")</td>
+                                    <td>@item?.Customer.Name</td>
+                                    <td>@item.Total.ToString("N0")đ</td>
+                                    <td>@item.GivenMoney.ToString("N0")đ</td>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.OrderId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Total)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.OrderId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Total)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+                                    @if (@item.Status)
+                                    {
+                                        <td>@((item.GivenMoney - item.Total).ToString("N0"))đ</td>
+                                        <td><div class="badge badge-success">paid</div></td>
+                                    }
+                                    else
+                                    {
+                                        <td>0 đ</td>
+                                        <td><div class="badge badge-danger">unpaid</div></td>
+                                    }
+                                    <td>@(item.User != null ? item.User.FullName : "N/A")</td>
+                                    <td>
+                                        <div class="d-flex align-items-center list-action">
+                                            <a class="btn btn-sm badge badge-info mr-2"
+                                               data-toggle="tooltip"
+                                               data-placement="top"
+                                               title=""
+                                               data-original-title="View"
+                                               asp-action="Details"
+                                               asp-route-id ="@item.OrderId"
+                                               ><i class="ri-eye-line mr-0"></i></a>
+                                            <button data-toggle="tooltip"
+                                                    data-placement="top"
+                                                    data-original-title="Delete"
+                                                    onclick="handleDelete(this)"
+                                                    class="btn btn-sm badge bg-warning mr-2"
+                                                    data-name="@item.OrderId"
+                                                    data-id="@item.Id">
+                                                <i class="ri-delete-bin-line mr-0"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- Page End -->
+    </div>
+</div>

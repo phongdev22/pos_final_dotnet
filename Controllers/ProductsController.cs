@@ -67,7 +67,6 @@ namespace pos.Controllers
 			return Ok(data);
 		}
 
-
 		// CREATE
 		public IActionResult Create()
 		{
@@ -134,5 +133,18 @@ namespace pos.Controllers
 			await _context.SaveChangesAsync();
 			return RedirectToAction("Index");
 		}
+		
+		[HttpDelete]		
+		public async Task<IActionResult> Delete(int id)
+		{
+            var product = await _context.Products.FirstOrDefaultAsync(od => od.Id == id);
+
+            if (product == null) return Ok(new { code = 1, Message = "Not found!" });
+            
+			_context.Products.Remove(product);
+            _context.SaveChanges();
+
+            return Ok(new { code = 0, Message = "Success" });
+        }
 	}
 }

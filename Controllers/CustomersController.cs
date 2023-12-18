@@ -126,6 +126,20 @@ namespace pos.Controllers
 			});
 		}
 
+		[HttpDelete]
+		public async Task<IActionResult> Delete(int id)
+		{
+            var customer = await _context.Customer.FirstOrDefaultAsync(od => od.Id == id);
+
+            if (customer == null) return Ok(new { code = 1, Message = "Not found!" });
+
+            _context.Customer.Remove(customer);
+            _context.SaveChanges();
+
+            return Ok(new { code = 0, Message = "Success" });
+        }
+
+
 		private bool CustomerExists(int id)
 		{
 			return _context.Customer.Any(e => e.Id == id);

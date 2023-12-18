@@ -39,7 +39,7 @@
 
 					@foreach (var item in Model)
 					{
-						<tr>
+						<tr id="data-@item.Id">
 
 							<td>
 								<div class="checkbox d-inline-block">
@@ -71,7 +71,7 @@
 								   data-original-title="Edit">
 									<i class="ri-pencil-line mr-0"></i>
 								</a>
-								<a asp-action="Delete" asp-route-id="@item.Id" 
+								<button
 								   class="btn btn-sm btn-danger badge mr-2"
 								   onclick="handleDelete(this)"
 								   data-name="@item.Name"
@@ -80,7 +80,7 @@
 								   data-placement="top"
 								   data-original-title="Delete">
 									<i class="ri-delete-bin-line mr-0"></i>
-								</a>
+								</button>
 							</td>
 						</tr>
 					}

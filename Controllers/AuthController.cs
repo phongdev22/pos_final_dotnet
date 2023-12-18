@@ -131,12 +131,12 @@ namespace pos.Controllers
 				return RedirectToAction("Error", "Error");
 			}
 
-			// Validate the timestamp
-			if (!Helpers.IsValidTimestamp(timestamp))
-			{
-				TempData["Message"] = "Link has expired!";
-				return RedirectToAction("Error", "Error");
-			}
+			//// Validate the timestamp
+			//if (!Helpers.IsValidTimestamp(timestamp))
+			//{
+			//	TempData["Message"] = "Link has expired!";
+			//	return RedirectToAction("Error", "Error");
+			//}
 
 			var result = await _userManager.ConfirmEmailAsync(user, token);
 

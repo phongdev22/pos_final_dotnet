@@ -72,12 +72,17 @@ namespace pos.Config
 
 		public void SeedingData(ModelBuilder builder)
 		{
-			// ROLE
-			builder.Entity<IdentityRole>().HasData(
+
+			var roles = new List<IdentityRole>()
+			{
 				new IdentityRole() { Name = "Admin", ConcurrencyStamp = "1", NormalizedName = "Admin" },
 				new IdentityRole() { Name = "Manager", ConcurrencyStamp = "1", NormalizedName = "Manager" },
 				new IdentityRole() { Name = "Employee", ConcurrencyStamp = "1", NormalizedName = "Employee" }
-			);
+			};
+
+
+			// ROLE
+			builder.Entity<IdentityRole>().HasData(roles);
 
 			// USER
 			var appUser = new ApplicationUser
@@ -92,10 +97,17 @@ namespace pos.Config
 				Active = true,
 				FirstLogin = false
 			};
+
 			PasswordHasher<ApplicationUser> hashedPassword = new PasswordHasher<ApplicationUser>();
 			appUser.PasswordHash = hashedPassword.HashPassword(appUser, "admin");
 
 			builder.Entity<ApplicationUser>().HasData(appUser);
+
+			builder.Entity<IdentityUserRole<string>>().HasData(
+				new IdentityUserRole<string>() { UserId = appUser.Id, RoleId = roles[0].Id }
+			);
+
+
 		}
 	}
 }
