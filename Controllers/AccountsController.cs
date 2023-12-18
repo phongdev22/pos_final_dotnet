@@ -84,7 +84,6 @@ namespace pos.Controllers
 				{
 					userId = appUser.Id,
 					token = emailConfirmationToken,
-					timestamp = currentUtcTime.ToString("yyyyMMddHHmmss")
 				}, Request.Scheme);
 
 				var emailSubject = "Welcome to YourApp";

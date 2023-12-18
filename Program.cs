@@ -58,8 +58,6 @@ namespace pos
 					options.SlidingExpiration = true;
 				});
 
-			// builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddDebug());
-
 			builder.Services.AddAuthorization();
 
 			var app = builder.Build();
@@ -76,10 +74,11 @@ namespace pos
 
 			app.UseRouting();
 
+
 			app.UseAuthentication();
 			app.UseAuthorization();
 
-			//app.UseMiddleware<FirstLoginMiddleware>();
+			app.UseMiddleware<FirstLoginMiddleware>();
 			//app.UseMiddleware<UserInfoMiddleware>();
 
 			app.MapControllerRoute(

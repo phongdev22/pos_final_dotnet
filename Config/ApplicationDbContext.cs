@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Crypto.Macs;
 using pos.Entities;
-using static Org.BouncyCastle.Asn1.Cmp.Challenge;
 
 namespace pos.Config
 {

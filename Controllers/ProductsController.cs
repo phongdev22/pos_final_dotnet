@@ -39,7 +39,6 @@ namespace pos.Controllers
 		}
 
 		// SEARCH
-
 		public async Task<IActionResult> Search([FromQuery] string keyword)
 		{
 			var products = _context.Products.AsNoTracking()
