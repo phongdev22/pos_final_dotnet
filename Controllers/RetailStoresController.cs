@@ -25,8 +25,10 @@ namespace pos.Controllers
         // GET: RetailStores/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            var retailStore = await _context.RetailStores.FindAsync(id);
+
             var orders = _context.Orders
-                .Where(or => or.RetailStore.Id == id)
+                .Where(or => or.User.RetailStoreId == id)
                 .ToList();
 
             var totalProductsSold = orders
@@ -50,6 +52,7 @@ namespace pos.Controllers
 
             var DetailModel = new DetailStoreModel()
             {
+                RetailStore = retailStore,
                 Orders = orders,
                 TotalProductsSold = totalProductsSold,
                 TotalRevenuePerStore = totalRevenuePerStore,

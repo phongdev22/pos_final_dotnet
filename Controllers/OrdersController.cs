@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
@@ -8,126 +9,142 @@ using pos.Models.Order;
 
 namespace pos.Controllers
 {
-    [Authorize]
-    public class OrdersController : Controller
-    {
-        private readonly ApplicationDbContext _context;
+	[Authorize]
+	public class OrdersController : Controller
+	{
+		private readonly ApplicationDbContext _context;
+		private readonly UserManager<ApplicationUser> _userManager;
 
-        public OrdersController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+		public OrdersController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+		{
+			_context = context;
+			_userManager = userManager;
+		}
 
-        public async Task<IActionResult> Index()
-        {
-            var orders = await _context.Orders.ToListAsync();
-            return View(orders);
-        }
+		public async Task<IActionResult> Index()
+		{
+			var orders = await _context.Orders.ToListAsync();
+			return View(orders);
+		}
 
-        [HttpGet]
-        public async Task<IActionResult> Details(string? id)
-        {
-            var order = await _context.Orders.FirstOrDefaultAsync(order => order.OrderId.Equals(id));
+		[HttpGet]
+		public async Task<IActionResult> Details(string? id)
+		{
+			var order = await _context.Orders.FirstOrDefaultAsync(order => order.OrderId.Equals(id));
 
-            if (order == null) return NotFound();
+			if (order == null) return NotFound();
 
-            if (!order.Status) return RedirectToAction("Checkout", new { id = order.OrderId });
+			if (!order.Status) return RedirectToAction("Checkout", new { id = order.OrderId });
 
-            return View(order);
-        }
+			return View(order);
+		}
 
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] OrderModel orders)
-        {
+		[HttpPost]
+		public async Task<IActionResult> Create([FromBody] OrderModel orders)
+		{
+			var billerName = HttpContext.User.Identity.Name;
 
-            var cusPhoneNumber = orders.Customer.PhoneNumber;
-            var customer = _context.Customer.FirstOrDefault(cus => cus.PhoneNumber.Equals(cusPhoneNumber));
+			var cusPhoneNumber = orders.Customer.PhoneNumber;
+			var customer = _context.Customer.FirstOrDefault(cus => cus.PhoneNumber.Equals(cusPhoneNumber));
 
-            if (customer == null)
-            {
-                var newCustomer = new Customer
-                {
-                    Address = orders.Customer.Address,
-                    PhoneNumber = cusPhoneNumber,
-                    Name = orders.Customer.Name,
-                };
-                _context.Add(newCustomer);
-                customer = newCustomer;
-            }
+			// Customer
+			if (customer == null)
+			{
+				var newCustomer = new Customer
+				{
+					Address = orders.Customer.Address,
+					PhoneNumber = cusPhoneNumber,
+					Name = orders.Customer.Name,
+				};
+				_context.Add(newCustomer);
+				customer = newCustomer;
+			}
 
-            var order = new Order()
-            {
-                OrderId = Guid.NewGuid().ToString(),
-                Total = orders.Total,
-                Customer = customer,
-            };
+			// Create Order
+			var order = new Order()
+			{
+				OrderId = Guid.NewGuid().ToString(),
+				Total = orders.Total,
+				Customer = customer,
+			};
 
-            foreach (var detail in orders.Products)
-            {
-                var pId = Convert.ToInt32(detail.Id);
-                var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == pId);
+			// Biller
+			if (billerName != null)
+			{
+				var biller = await _userManager.FindByNameAsync(billerName);
+				if (biller != null)
+				{
+					order.User = biller;
+				}
+			}
 
-                var od = new OrderDetail()
-                {
-                    Subtotal = detail.Subtotal,
-                    Quantity = detail.Quantity,
-                    Order = order,
-                    Product = product
-                };
-                _context.OrderDetails.Add(od);
-                order.OrderDetails.Add(od);
-            }
+			// Detail Order
+			foreach (var detail in orders.Products)
+			{
+				var pId = Convert.ToInt32(detail.Id);
+				var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == pId);
 
-            _context.Orders.Add(order);
+				var od = new OrderDetail()
+				{
+					Subtotal = detail.Subtotal,
+					Quantity = detail.Quantity,
+					Order = order,
+					Product = product
+				};
+				_context.OrderDetails.Add(od);
+				order.OrderDetails.Add(od);
+			}
 
-            var result = await _context.SaveChangesAsync();
+			_context.Orders.Add(order);
 
-            if (result > 0)
-            {
-                return Ok(new { code = 0, returnUrl = "/Orders/Checkout/" + order.OrderId });
-            }
-            else
-            {
-                return Ok(new
-                {
-                    code = 1,
-                    message = "Create order fail!"
-                });
-            }
-        }
+			var result = await _context.SaveChangesAsync();
 
-        [HttpGet]
-        public async Task<IActionResult> Checkout(string id)
-        {
-            var order = await _context.Orders.FirstOrDefaultAsync(od => od.OrderId.Equals(id));
-            return View(order);
-        }
+			if (result > 0)
+			{
+				return Ok(new { code = 0, returnUrl = "/Orders/Checkout/" + order.OrderId });
+			}
+			else
+			{
+				return Ok(new
+				{
+					code = 1,
+					message = "Create order fail!"
+				});
+			}
+		}
 
-        [HttpPost]
-        public async Task<IActionResult> Complete(string id, [FromBody] Order cash)
-        {
-            var order = await _context.Orders.FirstOrDefaultAsync(od => od.OrderId.Equals(id));
+		[HttpGet]
+		public async Task<IActionResult> Checkout(string id)
+		{
+			var order = await _context.Orders.FirstOrDefaultAsync(od => od.OrderId.Equals(id));
+			return View(order);
+		}
 
-            if (order == null) return Ok(new {code = 1, Message = "Not found!" });;
-            order.GivenMoney = cash.GivenMoney;
-            order.Status = true;
+		[HttpPost]
+		public async Task<IActionResult> Complete(string id, [FromBody] Order cash)
+		{
+			var order = await _context.Orders.FirstOrDefaultAsync(od => od.OrderId.Equals(id));
 
-            await _context.SaveChangesAsync();
+			if (order == null) return Ok(new { code = 1, Message = "Not found!" }); ;
+			order.GivenMoney = cash.GivenMoney;
+			order.Status = true;
 
-            return Ok(new { code = 0, returnUrl = "/", messsage = "Complete success!" });
-        }
+			await _context.SaveChangesAsync();
 
-        [HttpDelete]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var order = await _context.Orders.FirstOrDefaultAsync(od => od.Id == id);
+			return Ok(new { code = 0, returnUrl = "/", messsage = "Complete success!" });
+		}
 
-            if (order == null) return Ok(new { code = 1, Message = "Not found!" });
+		[HttpDelete]
+		public async Task<IActionResult> Delete(int id)
+		{
+			var order = await _context.Orders.FirstOrDefaultAsync(od => od.Id == id);
 
-            _context.Orders.Remove(order);
-            _context.SaveChanges();
+			if (order == null) return Ok(new { code = 1, Message = "Not found!" });
 
-            return Ok(new { code = 0, Message = "Success" });
-        }
-    }
+			_context.Orders.Remove(order);
+			_context.SaveChanges();
+
+			return Ok(new { code = 0, Message = "Success" });
+		}
+	}
 }

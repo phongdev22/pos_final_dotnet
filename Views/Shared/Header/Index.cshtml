@@ -13,7 +13,7 @@
 				<a href="/Products" class="btn text-uppercase btn-md mx-2">Products</a>
 				<a href="/Categories" class="btn text-uppercase btn-md mx-2">Collections</a>
 				<a href="/Accounts" class="btn text-uppercase btn-md mx-2">Accounts</a>
-@* 				<a href="/Orders" class="btn text-uppercase btn-md mx-2">Orders</a> *@
+				@* 				<a href="/Orders" class="btn text-uppercase btn-md mx-2">Orders</a> *@
 				<a href="/Customers" class="btn text-uppercase btn-md mx-2">Customers</a>
 				<a href="/Orders" class="btn text-uppercase btn-md mx-2">Orders</a>
 				<a href="/RetailStores" class="btn text-uppercase btn-md mx-2">Stores</a>
@@ -69,14 +69,21 @@
 										<div class="media-body profile-detail text-center">
 											<img src="/images/page-img/profile-bg.jpg"
 												 alt="profile-bg"
-												 class="rounded-top img-fluid mb-4"/>
-											<img src="~/images/user/1.png" class="rounded profile-img img-fluid avatar-70" />
+												 class="rounded-top img-fluid mb-4" />
+											@if (ViewData["Avatar"] != null)
+											{
+												<img src="@ViewData["Avatar"]" class="rounded profile-img img-fluid avatar-70" />
+											}
+											else
+											{
+												<img src="~/images/user/1.png" class="rounded profile-img img-fluid avatar-70" />
+											}
 										</div>
 										<div class="p-3">
-											<h5 class="mb-1">email@gmail.com</h5>
+											<h5 class="mb-1">@ViewData["Email"]</h5>
 											<p class="mb-0">Since 10 march, 2020</p>
 											<div class="d-flex align-items-center justify-content-center mt-3">
-												<a href="/accounts/profile/" class="btn border mr-2">Profile</a>
+												<a href="/Accounts/Profile/@ViewData["Name"]" class="btn border mr-2">Profile</a>
 												<a href="/Auth/Logout" class="btn border">Sign Out</a>
 											</div>
 										</div>

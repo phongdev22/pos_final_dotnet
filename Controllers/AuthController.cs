@@ -148,7 +148,7 @@ namespace pos.Controllers
             return RedirectToAction("Failed", "Notifications");
         }
 
-        [HttpGet("/Auth/forgot-password")]
+        [HttpPost]
         [AllowAnonymous]
         public IActionResult ForgotPassword([FromForm] string Email)
         {

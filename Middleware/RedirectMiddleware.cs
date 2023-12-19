@@ -2,11 +2,11 @@
 using Microsoft.IdentityModel.Tokens;
 using pos.Entities;
 
-public class FirstLoginMiddleware
+public class RedirectMiddleware
 {
     private readonly RequestDelegate _next;
 
-    public FirstLoginMiddleware(RequestDelegate next)
+    public RedirectMiddleware(RequestDelegate next)
     {
         _next = next;
     }
@@ -30,7 +30,13 @@ public class FirstLoginMiddleware
                 return;
             }
         }
-        
+
+        if (context.User.Identity != null && context.User.Identity.IsAuthenticated && context.Request.Path == "/Auth")
+        {
+            context.Response.Redirect("/");
+            return;
+        }
+
         await _next(context);
     }
 }

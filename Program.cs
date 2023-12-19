@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using pos.Config;
 using pos.Entities;
+using pos.Services;
 
 namespace pos
 {
@@ -58,7 +59,8 @@ namespace pos
 					options.SlidingExpiration = true;
 				});
 
-			builder.Services.AddAuthorization();
+			//builder.Services.AddAuthorization
+			builder.Services.AddSingleton<MyDataService>();
 
 			var app = builder.Build();
 
@@ -78,7 +80,7 @@ namespace pos
 			app.UseAuthentication();
 			app.UseAuthorization();
 
-			app.UseMiddleware<FirstLoginMiddleware>();
+			app.UseMiddleware<RedirectMiddleware>();
 			//app.UseMiddleware<UserInfoMiddleware>();
 
 			app.MapControllerRoute(
