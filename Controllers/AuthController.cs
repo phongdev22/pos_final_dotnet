@@ -120,34 +120,7 @@ namespace pos.Controllers
 			}
 		}
 
-		[HttpGet]
-		public async Task<IActionResult> Verify(string userId, string token, string timestamp)
-		{
-			var user = await _userManager.FindByIdAsync(userId);
-
-			if (user == null)
-			{
-				TempData["Message"] = "User not found!";
-				return RedirectToAction("Error", "Error");
-			}
-
-			// Validate the timestamp
-			if (!Helpers.IsValidTimestamp(timestamp))
-			{
-				TempData["Message"] = "Link has expired!";
-				return RedirectToAction("Error", "Error");
-			}
-
-			var result = await _userManager.ConfirmEmailAsync(user, token);
-
-			if (result.Succeeded)
-			{
-				return RedirectToAction("Index");
-			}
-
-			TempData["Message"] = "Verify failed. Please contact admin to help!";
-			return RedirectToAction("Error", "Error");
-		}
+		
 
 		[HttpGet("/Auth/forgot-password")]
 		[AllowAnonymous]
