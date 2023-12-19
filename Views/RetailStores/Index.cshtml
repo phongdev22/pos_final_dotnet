@@ -4,7 +4,7 @@
 	ViewData["Title"] = "POS | Stores";
 }
 
-<div class="row justify-content-end py-1">
+<div class="row justify-content-end py-1 mb-2">
 	<a asp-action="Create" class="btn btn-primary mr-5">Create New</a>
 </div>
 <div class="row row-cols-1 row-cols-md-3">
@@ -16,9 +16,6 @@
 					<a asp-action="Details" asp-route-id="@item.Id">
 						<img class="card-img-top" src="~/images/default/store/shop.jpg">
 					</a>
-					@* <a>
-						<div class="mask rgba-white-slight waves-effect waves-light"></div>
-					</a> *@
 				</div>
 				<div class="card-body card-body-cascade text-center">
 					<h4 class="card-title"><strong>@Html.DisplayFor(modelItem => item.StoreName)</strong></h4>

@@ -1,18 +1,24 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 using pos.Config;
 using pos.Entities;
 using pos.Models.Order;
 
 namespace pos.Controllers
 {
+	[Authorize]
 	public class OrdersController : Controller
 	{
 		private readonly ApplicationDbContext _context;
+		private readonly UserManager<ApplicationUser> _userManager;
 
-		public OrdersController(ApplicationDbContext context)
+		public OrdersController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
 		{
 			_context = context;
+			_userManager = userManager;
 		}
 
 		public async Task<IActionResult> Index()
@@ -21,13 +27,27 @@ namespace pos.Controllers
 			return View(orders);
 		}
 
+		[HttpGet]
+		public async Task<IActionResult> Details(string? id)
+		{
+			var order = await _context.Orders.FirstOrDefaultAsync(order => order.OrderId.Equals(id));
+
+			if (order == null) return NotFound();
+
+			if (!order.Status) return RedirectToAction("Checkout", new { id = order.OrderId });
+
+			return View(order);
+		}
+
 		[HttpPost]
 		public async Task<IActionResult> Create([FromBody] OrderModel orders)
 		{
+			var billerName = HttpContext.User.Identity.Name;
 
 			var cusPhoneNumber = orders.Customer.PhoneNumber;
 			var customer = _context.Customer.FirstOrDefault(cus => cus.PhoneNumber.Equals(cusPhoneNumber));
 
+			// Customer
 			if (customer == null)
 			{
 				var newCustomer = new Customer
@@ -40,6 +60,7 @@ namespace pos.Controllers
 				customer = newCustomer;
 			}
 
+			// Create Order
 			var order = new Order()
 			{
 				OrderId = Guid.NewGuid().ToString(),
@@ -47,6 +68,17 @@ namespace pos.Controllers
 				Customer = customer,
 			};
 
+			// Biller
+			if (billerName != null)
+			{
+				var biller = await _userManager.FindByNameAsync(billerName);
+				if (biller != null)
+				{
+					order.User = biller;
+				}
+			}
+
+			// Detail Order
 			foreach (var detail in orders.Products)
 			{
 				var pId = Convert.ToInt32(detail.Id);
@@ -80,14 +112,39 @@ namespace pos.Controllers
 				});
 			}
 		}
-		
-		[HttpGet("/Orders/Checkout/{id}")]
-		public async Task<IActionResult> Checkout(string? id)
+
+		[HttpGet]
+		public async Task<IActionResult> Checkout(string id)
+		{
+			var order = await _context.Orders.FirstOrDefaultAsync(od => od.OrderId.Equals(id));
+			return View(order);
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> Complete(string id, [FromBody] Order cash)
 		{
 			var order = await _context.Orders.FirstOrDefaultAsync(od => od.OrderId.Equals(id));
 
-			return View(order);
+			if (order == null) return Ok(new { code = 1, Message = "Not found!" }); ;
+			order.GivenMoney = cash.GivenMoney;
+			order.Status = true;
+
+			await _context.SaveChangesAsync();
+
+			return Ok(new { code = 0, returnUrl = "/", messsage = "Complete success!" });
 		}
-		
+
+		[HttpDelete]
+		public async Task<IActionResult> Delete(int id)
+		{
+			var order = await _context.Orders.FirstOrDefaultAsync(od => od.Id == id);
+
+			if (order == null) return Ok(new { code = 1, Message = "Not found!" });
+
+			_context.Orders.Remove(order);
+			_context.SaveChanges();
+
+			return Ok(new { code = 0, Message = "Success" });
+		}
 	}
 }

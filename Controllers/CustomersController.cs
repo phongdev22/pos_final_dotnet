@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using pos.Config;
 using pos.Entities;
 
 namespace pos.Controllers
 {
+	[Authorize]
 	public class CustomersController : Controller
 	{
 		private readonly ApplicationDbContext _context;
@@ -125,6 +127,20 @@ namespace pos.Controllers
 				}
 			});
 		}
+
+		[HttpDelete]
+		public async Task<IActionResult> Delete(int id)
+		{
+            var customer = await _context.Customer.FirstOrDefaultAsync(od => od.Id == id);
+
+            if (customer == null) return Ok(new { code = 1, Message = "Not found!" });
+
+            _context.Customer.Remove(customer);
+            _context.SaveChanges();
+
+            return Ok(new { code = 0, Message = "Success" });
+        }
+
 
 		private bool CustomerExists(int id)
 		{

@@ -10,191 +10,207 @@ using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Security.Principal;
 
 namespace pos.Controllers
 {
-	public class AuthController : Controller
-	{
-		private readonly SignInManager<ApplicationUser> _signInManager;
-		private readonly UserManager<ApplicationUser> _userManager;
-		private readonly RoleManager<IdentityRole> _roleManager;
-		private IConfiguration _configuration;
+    public class AuthController : Controller
+    {
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private IConfiguration _configuration;
 
-		public AuthController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration config)
-		{
-			_signInManager = signInManager;
-			_userManager = userManager;
-			_roleManager = roleManager;
-			_configuration = config;
-		}
+        public AuthController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration config)
+        {
+            _signInManager = signInManager;
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _configuration = config;
+        }
 
-		[HttpGet]
-		public IActionResult Index()
-		{
-			ViewData["Title"] = "POS | Login";
-			ViewBag.Message = TempData["Message"];
-			return View("Login");
-		}
+        [HttpGet]
+        public IActionResult Index()
+        {
+            ViewData["Title"] = "POS | Login";
+            ViewBag.Message = TempData["Message"];
+            return View("Login");
+        }
 
-		[HttpPost]
-		public async Task<IActionResult> Index(LoginModel login)
-		{
-			if (ModelState.IsValid)
-			{
-				var user = await _userManager.FindByNameAsync(login.Username);
-				if (user != null && await _userManager.CheckPasswordAsync(user, login.Password.Trim()))
-				{
-					var userRoles = await _userManager.GetRolesAsync(user);
+        [HttpPost]
+        public async Task<IActionResult> Index(LoginModel login)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByNameAsync(login.Username);
+                if (user != null && await _userManager.CheckPasswordAsync(user, login.Password.Trim()))
+                {
+                    var userRoles = await _userManager.GetRolesAsync(user);
 
-					var authClaims = new List<Claim>
-					{
-						new Claim(ClaimTypes.Name, login.Username),
-						new Claim(ClaimTypes.Email, user.Email),
-						new Claim("Avatar", user.Avatar),
-						new Claim("FirstLogin", user.FirstLogin.ToString()),
-						new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-					};
+                    var authClaims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, login.Username),
+                        new Claim(ClaimTypes.Email, user.Email),
+                        new Claim("Avatar", user.Avatar),
+                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    };
 
-					foreach (var userRole in userRoles)
-					{
-						authClaims.Add(new Claim(ClaimTypes.Role, userRole));
-					}
+                    // Check first Login
+                    if (user.FirstLogin)
+                    {
+                        authClaims.Add(new Claim("FirstLogin", user.FirstLogin.ToString()));
+                    }
 
-					var identityClaims = new ClaimsIdentity(authClaims, "Identity");
-					var principal = new ClaimsPrincipal(identityClaims);
+                    foreach (var userRole in userRoles)
+                    {
+                        authClaims.Add(new Claim(ClaimTypes.Role, userRole));
+                    }
 
-					await HttpContext.SignInAsync(principal);
+                    // Sign Indentity
+                    var identityClaims = new ClaimsIdentity(authClaims, "Identity");
+                    var principal = new ClaimsPrincipal(identityClaims);
 
-					// Đăng nhập thành công
-					return RedirectToAction("Index", "Home");
-				}
+                    await HttpContext.SignInAsync(principal);
 
-				TempData["Message"] = "Please check your account again!";
-				return RedirectToAction("Index");
-			}
-			return RedirectToAction("Index", "Home");
-		}
+                    return RedirectToAction("Index", "Home");
+                }
 
-		[HttpGet]
-		public async Task<IActionResult> Logout()
-		{
-			await HttpContext.SignOutAsync();
-			return RedirectToAction("Index");
-		}
+                TempData["Message"] = "Please check your account again!";
+                return RedirectToAction("Index");
+            }
+            return RedirectToAction("Index", "Home");
+        }
 
-		[HttpGet]
-		[Route("Auth/Resend/{id}")]
-		public async Task<IActionResult> Resend(string id)
-		{
-			var user = await _userManager.FindByIdAsync(id);
+        [HttpGet]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync();
+            return RedirectToAction("Index");
+        }
 
-			if (user == null)
-			{
-				return NotFound();
-			}
+        [HttpGet]
+        [Route("Auth/Resend/{id}")]
+        public async Task<IActionResult> Resend(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
 
-			var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            if (user == null)
+            {
+                return NotFound();
+            }
 
-			// Thêm timestamp vào URL
-			var timestamp = DateTimeOffset.UtcNow.ToString("yyyyMMddHHmmss");
-			var confirmationLink = Url.Action("Verify", "Auth", new
-			{
-				userId = user.Id,
-				token = emailConfirmationToken,
-				timestamp
-			}, Request.Scheme);
+            var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-			var emailSubject = "Welcome to YourApp";
-			var emailContent = $"Thank you for registering with YourApp. Your account has been created successfully." +
-							   $" Please confirm your email by clicking <a href='{confirmationLink}'>here</a>.";
+            // Thêm timestamp vào URL
+            var timestamp = DateTimeOffset.UtcNow.ToString("yyyyMMddHHmmss");
+            var confirmationLink = Url.Action("Verify", "Auth", new
+            {
+                userId = user.Id,
+                token = emailConfirmationToken,
+            }, Request.Scheme);
 
-			try
-			{
-				await Helpers.SendEmail(_configuration, user.Email, emailSubject, emailContent);
-				return Ok();
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"Failed to send email: {ex.Message}");
-				return StatusCode(500, "Failed to send email.");
-			}
-		}
+            var emailSubject = "Welcome to YourApp";
+            var emailContent = $"Thank you for registering with YourApp. Your account has been created successfully." +
+                               $" Please confirm your email by clicking <a href='{confirmationLink}'>here</a>.";
 
-		[HttpGet]
-		public async Task<IActionResult> Verify(string userId, string token, string timestamp)
-		{
-			var user = await _userManager.FindByIdAsync(userId);
+            try
+            {
+                await Helpers.SendEmail(_configuration, user.Email, emailSubject, emailContent);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send email: {ex.Message}");
+                return StatusCode(500, "Failed to send email.");
+            }
+        }
 
-			if (user == null)
-			{
-				TempData["Message"] = "User not found!";
-				return RedirectToAction("Error", "Error");
-			}
+        [HttpGet]
+        public async Task<IActionResult> Verify(string userId, string token, string timestamp)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
 
-			// Validate the timestamp
-			if (!Helpers.IsValidTimestamp(timestamp))
-			{
-				TempData["Message"] = "Link has expired!";
-				return RedirectToAction("Error", "Error");
-			}
+            if (user == null)
+            {
+                TempData["Message"] = "User not found!";
+                return RedirectToAction("Error", "Notifications");
+            }
 
-			var result = await _userManager.ConfirmEmailAsync(user, token);
+            var result = await _userManager.ConfirmEmailAsync(user, token);
 
-			if (result.Succeeded)
-			{
-				return RedirectToAction("Index");
-			}
+            if (result.Succeeded)
+            {
+                TempData["Message"] = "Verify Success.";
+                return RedirectToAction("Success", "Notifications");
+            }
 
-			TempData["Message"] = "Verify failed. Please contact admin to help!";
-			return RedirectToAction("Error", "Error");
-		}
+            TempData["Message"] = "Verify failed. Please contact admin to help!";
+            return RedirectToAction("Failed", "Notifications");
+        }
 
-		[HttpGet("/Auth/forgot-password")]
-		[AllowAnonymous]
-		public IActionResult ForgotPassword([FromForm] string Email)
-		{
-			ViewData["Title"] = "POS | Forgot-password";
-			return View();
-		}
+        [HttpPost]
+        [AllowAnonymous]
+        public IActionResult ForgotPassword([FromForm] string Email)
+        {
+            ViewData["Title"] = "POS | Forgot-password";
+            return View();
+        }
 
-		// First Login
-		[HttpGet("/Auth/first-login")]
-		public IActionResult ChangePasswordFirstLogin()
-		{
-			ViewBag.Message = TempData["Message"];
-			return View("FirstLogin");
-		}
+        // First Login
+        [HttpGet("/Auth/first-login")]
+        public IActionResult ChangePasswordFirstLogin()
+        {
+            ViewBag.Message = TempData["Message"];
+            return View("FirstLogin");
+        }
 
-		[HttpPost("/Auth/first-login")]
-		public async Task<IActionResult> ChangePasswordFirstLogin([FromForm] string password, [FromForm] string confirmPassword)
-		{
-			var username = HttpContext.User.Identity.Name;
+        [HttpPost("/Auth/first-login")]
+        public async Task<IActionResult> ChangePasswordFirstLogin([FromForm] string password, [FromForm] string confirmPassword)
+        {
+            var username = HttpContext.User.Identity.Name;
 
-			if (username == null)
-			{
-				TempData["Message"] = "Cannot found user!";
-				return RedirectToAction("ChangePasswordFirstLogin");
-			}
+            if (username == null)
+            {
+                TempData["Message"] = "Cannot found user!";
+                return RedirectToAction("ChangePasswordFirstLogin");
+            }
 
-			var user = await _userManager.FindByNameAsync(username);
-			if (user == null)
-			{
-				TempData["Message"] = "An Error Occured";
-				return RedirectToAction("ChangePasswordFirstLogin");
-			}
+            var user = await _userManager.FindByNameAsync(username);
+            if (user == null)
+            {
+                TempData["Message"] = "An Error Occured";
+                return RedirectToAction("ChangePasswordFirstLogin");
+            }
 
-			var result = await _userManager.ChangePasswordAsync(user, currentPassword: null, newPassword: password);
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, password);
 
-			if (result.Succeeded)
-			{
-				await _userManager.ReplaceClaimAsync(user, new Claim("FirstLogin", "True"), new Claim("FirstLogin", "False"));
-				return RedirectToAction("/");
-			}
-			else
-			{
-				TempData["Message"] = result.Errors.FirstOrDefault()?.Description;
-				return RedirectToAction("ChangePasswordFirstLogin");
-			}
-		}
-	}
+            if (result.Succeeded)
+            {
+                // First Login
+                user.FirstLogin = false;
+                await _userManager.UpdateAsync(user);
+
+                // Remove Claim First Login
+                var isFirstLoginClaim = User.FindFirst("FirstLogin");
+                if (isFirstLoginClaim != null)
+                {
+
+                    var identity = (ClaimsIdentity)User.Identity;
+                    identity.RemoveClaim(isFirstLoginClaim);
+
+                    var updatedPrincipal = new ClaimsPrincipal(identity);
+
+                    // Sign in with the updated ClaimsPrincipal
+                    await HttpContext.SignInAsync(updatedPrincipal);
+                }
+                return RedirectToAction("Index", "Home");
+            }
+            else
+            {
+                TempData["Message"] = result.Errors.FirstOrDefault()?.Description;
+                return RedirectToAction("ChangePasswordFirstLogin");
+            }
+        }
+    }
 }

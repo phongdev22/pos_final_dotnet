@@ -3,11 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using pos.Config;
 using pos.Entities;
 using pos.Models;
-using System.Drawing.Printing;
-using System.Net;
-using System.Net.Mail;
 using pos.Utils;
-using System.Net.WebSockets;
 using Microsoft.EntityFrameworkCore;
 
 namespace pos.Controllers
@@ -19,6 +15,7 @@ namespace pos.Controllers
 		private readonly RoleManager<IdentityRole> _roleManager;
 		private readonly IConfiguration _configuration;
 		private List<IdentityRole> _roles;
+		private List<RetailStore> _stores;
 
 		private int PageSize = 10;
 
@@ -29,16 +26,16 @@ namespace pos.Controllers
 			_roleManager = roleManager;
 			_configuration = configuration;
 			_roles = _roleManager.Roles.Where(r => r.Name != "Admin").ToList();
+			_stores = _context.RetailStores.ToList();
 		}
 
 		public async Task<IActionResult> Index(int page = 1, [FromQuery] int store = 1)
 		{
 			var currentUserName = User.Identity.Name;
 			
-
-			var accounts = _userManager.Users.AsQueryable().Where(c => !c.NormalizedUserName.Equals(currentUserName) && !c.NormalizedUserName.Equals("Admin"))
+			var accounts = await _userManager.Users.AsQueryable().Where(c => !c.NormalizedUserName.Equals(currentUserName) && !c.NormalizedUserName.Equals("Admin"))
 					.Skip((page - 1) * PageSize)
-					.Take(PageSize).ToList();
+					.Take(PageSize).ToListAsync();
 
 			var pageAccount = new PageViewModel<ApplicationUser>() { Items = accounts, PageNumber = page, PageSize = PageSize, TotalItems = accounts.Count };
 
@@ -47,26 +44,29 @@ namespace pos.Controllers
 
 		public IActionResult Create()
 		{
-			var ratailStores = _context.RetailStores.ToList();
-
+			ViewBag.Stores = _stores;
 			ViewBag.Roles = _roles;
 			return View();
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Create(ApplicationUser appUser, [FromForm] string[] Roles)
+		public async Task<IActionResult> Create(ApplicationUser appUser, [FromForm] string[] Roles, int retailId)
 		{
 			// Time at starting create
 			var currentUtcTime = DateTimeOffset.Now;
 
 			var listRoles = _roles;
+			ViewBag.Roles = listRoles;
+
+			var store = _context.RetailStores.FirstOrDefault(retail => retail.Id == retailId);
 
 			var username = appUser.Email.Split("@")[0];
 			var password = username;
-
+			
 			appUser.NormalizedUserName = username;
 			appUser.UserName = username;
 			appUser.NormalizedEmail = appUser.Email;
+			appUser.RetailStore = store;
 
 			var account = await _userManager.CreateAsync(appUser, password);
 
@@ -83,7 +83,6 @@ namespace pos.Controllers
 				{
 					userId = appUser.Id,
 					token = emailConfirmationToken,
-					timestamp = currentUtcTime.ToString("yyyyMMddHHmmss")
 				}, Request.Scheme);
 
 				var emailSubject = "Welcome to YourApp";
@@ -93,7 +92,6 @@ namespace pos.Controllers
 				await Helpers.SendEmail(_configuration, appUser.Email, emailSubject, emailContent);
 
 				return RedirectToAction("Index");
-
 			}
 			else
 			{
@@ -115,6 +113,7 @@ namespace pos.Controllers
 		public async Task<IActionResult> Edit(string id)
 		{
 			ViewBag.Roles = _roles;
+			ViewBag.Stores = _stores;
 
 			if (id == null)
 			{
@@ -172,6 +171,36 @@ namespace pos.Controllers
 			
 			return RedirectToAction("Edit");
 		}
+
+		[HttpGet]
+		public async Task<IActionResult> Profile(string id)
+		{
+			var profile = await _userManager.FindByNameAsync(id);
+			
+			if(profile == null) return Ok();
+			
+			var roles = await _userManager.GetRolesAsync(profile);
+			ViewBag.Roles = roles;
+			
+			return View(profile);
+		}
+
+		[HttpPost] async Task<IActionResult> UpdateAvatar(IFormFile file)
+		{
+			return Ok(new {code = 0});
+		}
+
+		[HttpDelete]
+		public async Task<IActionResult> Delete(string id)
+		{
+			var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null) return Ok(new { code = 1, Message = "Not found!" });
+			await _userManager.DeleteAsync(user);
+
+            return Ok(new { code = 0, Message = "Success" });
+        }
+		
 		private async Task UpdateUserRoles(ApplicationUser user, string[] roles)
 		{
 			var existingRoles = await _userManager.GetRolesAsync(user);

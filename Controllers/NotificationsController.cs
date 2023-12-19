@@ -4,8 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace pos.Controllers
 {
-    public class ErrorController : Controller
+    public class NotificationsController : Controller
     {
+        [AllowAnonymous]
         [Route("Error/{statusCode}")]
         public IActionResult HttpStatusCodeHandler(int statusCode)
         {
@@ -18,6 +19,8 @@ namespace pos.Controllers
                 case 404:
                     ViewBag.ErrorMessage = "Sorry, the resource you requested could not be found.";
                     break;
+                case 505:
+                    break;
             }
 
             return View("Error");
@@ -28,8 +31,28 @@ namespace pos.Controllers
         public IActionResult Error()
         {
             var exceptionHandlerPathFeature = HttpContext.Features.Get<IExceptionHandlerPathFeature>();
-			ViewBag.ErrorMessage = TempData["Message"];
+			ViewBag.Message = TempData["Message"];
 			return View("Error");
         }
-    }
+
+        public IActionResult AccessDenied()
+        {
+            return View("Error");
+        }
+
+		// [AllowAnonymous]
+		public IActionResult Failed()
+        {
+            ViewBag.Message = TempData["Message"] == null ? "Failed !" : TempData["Message"];
+            return View();
+        }
+
+		// [AllowAnonymous]
+		public IActionResult Success()
+        {
+            ViewBag.Message = TempData["Message"] == null ? "Success !" : TempData["Message"];
+            return View();
+        }
+
+	}
 }

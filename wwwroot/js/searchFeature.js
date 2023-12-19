@@ -4,9 +4,8 @@ const url = origin;
 const searchInput = document.querySelector("#search");
 
 // Debounce function
-function debounce_1(func, delay) {
+function debounce(func, delay) {
     let timeoutId;
-
     return function () {
         const context = this;
         const args = arguments;
@@ -97,12 +96,32 @@ async function performSearch() {
             }
         });
     } else {
-        // const response = await fetch(url + pathname + "/search?keyword=" + searchTerm, {
-        //    method: "GET",
-        // });
     }
 }
 
-const debouncedSearch = debounce_1(performSearch, 300);
+const debouncedSearch = debounce(performSearch, 300);
 searchInput.addEventListener("input", debouncedSearch);
 
+async function getCusInfo(inputField) {
+    const btnHistory = document.querySelector("#history");
+    const url = window.location.origin + "/customers/search?keyword=";
+    const phone = inputField.value;
+    if (phone) {
+        await fetch(url + phone).then(async (res) => {
+            const data = await res.json();
+            console.log(data)
+            if (data.code === 0) {
+                document.querySelector("#name").value = data.customer.name;
+                document.querySelector("#address").value = data.customer.address;
+                btnHistory.classList.remove("disabled");
+                btnHistory.setAttribute("href", "/orders/all/" + phone);
+            } else {
+                btnHistory.classList.add("disabled");
+            }
+        });
+    } else {
+        btnHistory.classList.add("disabled");
+    }
+}
+
+const handleGetCusInfoDebounced = debounce(getCusInfo, 400);

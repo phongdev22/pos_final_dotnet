@@ -16,6 +16,7 @@
 				</div>
 				<div class="card-body">
 					<form method="post" asp-action="Edit" data-toggle="validator">
+						<input hidden asp-for="Id"/>
 						<div class="row">
 							<div class="col-md-6">
 								<div class="form-group">
@@ -56,13 +57,12 @@
 								<div class="form-group">
 									<label>Gender</label>
 									<div class="d-flex align-items-center mt-2">
-
 										<div class="custom-control custom-checkbox custom-checkbox-color-check custom-control-inline">
-											<input type="radio" asp-for="Gender" id="Male" checked="@(Model.Gender == true)" class="custom-control-input bg-success">
+											<input asp-for="Gender" type="radio" value="true" id="Male" class="custom-control-input">  @* checked="@(Model.Gender == true)" *@
 											<label class="custom-control-label" for="Male">Male</label>
 										</div>
 										<div class="custom-control custom-checkbox custom-checkbox-color-check custom-control-inline">
-											<input type="radio" asp-for="Gender" id="Female" checked="@(Model.Gender == false)" class="custom-control-input bg-success">
+											<input asp-for="Gender" type="radio" value="false" id="Female" class="custom-control-input">  @* checked="@(Model.Gender == false)" *@
 											<label class="custom-control-label" for="Female">Female</label>
 										</div>
 									</div>

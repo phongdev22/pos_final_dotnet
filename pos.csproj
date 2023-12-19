@@ -29,7 +29,6 @@
 
   <ItemGroup>
     <Folder Include="Models\AccountModel\" />
-    <Folder Include="Models\Error\" />
   </ItemGroup>
 
 </Project>

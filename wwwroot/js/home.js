@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
     renderCart();
 });
 
-document.querySelector("#checkoutButton").addEventListener("click", function () {
+const checkout = function () {
     const url = window.location.origin + "/orders/create";
 
     const phoneNumber = $("#phoneNumber").val();
@@ -53,7 +53,10 @@ document.querySelector("#checkoutButton").addEventListener("click", function () 
     } else {
         alert("Không có dữ liệu giỏ hàng.");
     }
-});
+}
+
+
+document.querySelector("#checkoutButton").addEventListener("click", checkout);
 
 // CONVERT CURRENCY
 const convertVND = (x) => x.toLocaleString("it-IT", { style: "currency", currency: "VND" }).replace("VND", "đ");
@@ -172,33 +175,33 @@ const updateTotal = function () {
     document.querySelector("#cart-total").textContent = `Total: ${convertVND(total)}`;
 };
 
-function debounce(func, delay) {
-    let timerId;
+//function debounce(func, delay) {
+//    let timerId;
 
-    return function () {
-        const context = this;
-        const args = arguments;
+//    return function () {
+//        const context = this;
+//        const args = arguments;
 
-        clearTimeout(timerId);
-        timerId = setTimeout(function () {
-            func.apply(context, args);
-        }, delay);
-    };
-}
+//        clearTimeout(timerId);
+//        timerId = setTimeout(function () {
+//            func.apply(context, args);
+//        }, delay);
+//    };
+//}
 
-async function getCusInfo(inputField) {
-    const url = window.location.origin + "/customers/search?keyword=";
-    const phone = inputField.value;
-    if (phone) {
-        await fetch(url + phone).then(async (res) => {
-            const data = await res.json();
-            console.log(data)
-            if (data.code === 0) {
-                document.querySelector("#name").value = data.customer.name;
-                document.querySelector("#address").value = data.customer.address;
-            }
-        });
-    }
-}
+//async function getCusInfo(inputField) {
+//    const url = window.location.origin + "/customers/search?keyword=";
+//    const phone = inputField.value;
+//    if (phone) {
+//        await fetch(url + phone).then(async (res) => {
+//            const data = await res.json();
+//            console.log(data)
+//            if (data.code === 0) {
+//                document.querySelector("#name").value = data.customer.name;
+//                document.querySelector("#address").value = data.customer.address;
+//            }
+//        });
+//    }
+//}
 
-const handleGetCusInfoDebounced = debounce(getCusInfo, 400);
+//const handleGetCusInfoDebounced = debounce(getCusInfo, 400);

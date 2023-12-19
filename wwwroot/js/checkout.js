@@ -34,17 +34,18 @@ document.querySelector("#cash").oninput = function (event) {
 
 async function handleComplete(button) {
     const { orderid } = button.dataset;
-    const customerMoney = parseInt(document.querySelector("#cash").value);
+    const cash = parseInt(document.querySelector("#cash").value);
 
-    await fetch("/orders/complete", {
+    console.log(cash)
+
+    await fetch("/orders/complete/" + orderid, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({ orderID: orderid, status: true, customerMoney }),
+        body: JSON.stringify({ GivenMoney:  cash }),
     }).then(async (res) => {
         const result = await res.json();
-
         if (result.code === 0) {
             printInvoice("#invoice-pdf", () => {
                 localStorage.setItem("cart", JSON.stringify([]));

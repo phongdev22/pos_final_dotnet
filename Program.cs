@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using pos.Config;
 using pos.Entities;
+using pos.Services;
 
 namespace pos
 {
@@ -17,8 +18,8 @@ namespace pos
 			// Add services to the container.
 			builder.Services.AddControllersWithViews();
 
-			// DB Configuration
-			builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            // DB Configuration
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
 			{
 				options.UseLazyLoadingProxies().UseSqlServer(configration.GetConnectionString("posSystemDB"));
 			});
@@ -47,8 +48,8 @@ namespace pos
 				options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 				options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 				options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-			})
-				.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+
+			}).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
 				{
 					options.LoginPath = "/Auth"; // Đường dẫn đăng nhập của bạn
 					options.LogoutPath = "/Auth/Logout";
@@ -58,9 +59,8 @@ namespace pos
 					options.SlidingExpiration = true;
 				});
 
-			// builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddDebug());
-
-			builder.Services.AddAuthorization();
+			//builder.Services.AddAuthorization
+			builder.Services.AddSingleton<MyDataService>();
 
 			var app = builder.Build();
 
@@ -76,10 +76,11 @@ namespace pos
 
 			app.UseRouting();
 
+
 			app.UseAuthentication();
 			app.UseAuthorization();
 
-			//app.UseMiddleware<FirstLoginMiddleware>();
+			app.UseMiddleware<RedirectMiddleware>();
 			//app.UseMiddleware<UserInfoMiddleware>();
 
 			app.MapControllerRoute(
