@@ -55,79 +55,8 @@ namespace pos.Controllers
 			return View(orders);
 		}
 
-		[HttpPost]
-		public async Task<IActionResult> Create([FromBody] OrderModel orders)
-		{
-			var billerName = HttpContext.User.Identity.Name;
-
-			var cusPhoneNumber = orders.Customer.PhoneNumber;
-			var customer = _context.Customer.FirstOrDefault(cus => cus.PhoneNumber.Equals(cusPhoneNumber));
-
-			// Customer
-			if (customer == null)
-			{
-				var newCustomer = new Customer
-				{
-					Address = orders.Customer.Address,
-					PhoneNumber = cusPhoneNumber,
-					Name = orders.Customer.Name,
-				};
-				_context.Add(newCustomer);
-				customer = newCustomer;
-			}
-
-			// Create Order
-			var order = new Order()
-			{
-				OrderId = Guid.NewGuid().ToString(),
-				Total = orders.Total,
-				Customer = customer,
-			};
-
-			// Biller
-			if (billerName != null)
-			{
-				var biller = await _userManager.FindByNameAsync(billerName);
-				if (biller != null)
-				{
-					order.User = biller;
-				}
-			}
-
-			// Detail Order
-			foreach (var detail in orders.Products)
-			{
-				var pId = Convert.ToInt32(detail.Id);
-				var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == pId);
-
-				var od = new OrderDetail()
-				{
-					Subtotal = detail.Subtotal,
-					Quantity = detail.Quantity,
-					Order = order,
-					Product = product
-				};
-				_context.OrderDetails.Add(od);
-				order.OrderDetails.Add(od);
-			}
-
-			_context.Orders.Add(order);
-
-			var result = await _context.SaveChangesAsync();
-
-			if (result > 0)
-			{
-				return Ok(new { code = 0, returnUrl = "/Orders/Checkout/" + order.OrderId });
-			}
-			else
-			{
-				return Ok(new
-				{
-					code = 1,
-					message = "Create order fail!"
-				});
-			}
-		}
+		
+		
 
 		[HttpGet]
 		public async Task<IActionResult> Checkout(string id)
