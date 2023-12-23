@@ -28,6 +28,15 @@ namespace pos.Controllers
 		}
 
 		[HttpGet]
+		public async Task<IActionResult> History(string id)
+		{
+			var result = await _context.Orders.Where(or => or.Customer.PhoneNumber.Equals(id)).ToListAsync();
+			ViewBag.TotalSpending = result.Sum(or => or.Total);
+			ViewBag.TotalOrder = result.Count();
+			return View(result);
+		}
+
+		[HttpGet]
 		public async Task<IActionResult> Details(string? id)
 		{
 			var order = await _context.Orders.FirstOrDefaultAsync(order => order.OrderId.Equals(id));
@@ -37,6 +46,13 @@ namespace pos.Controllers
 			if (!order.Status) return RedirectToAction("Checkout", new { id = order.OrderId });
 
 			return View(order);
+		}
+
+		[HttpGet]
+		public async Task<IActionResult> Search(string phoneNumber, [FromQuery]string start, [FromQuery]string end)
+		{
+			var orders = await _context.Orders.Where(od => od.Customer.PhoneNumber.Equals(phoneNumber)).ToListAsync();	
+			return View(orders);
 		}
 
 		[HttpPost]

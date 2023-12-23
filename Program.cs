@@ -48,7 +48,6 @@ namespace pos
 				options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 				options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 				options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-
 			}).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
 				{
 					options.LoginPath = "/Auth"; // Đường dẫn đăng nhập của bạn
@@ -75,7 +74,6 @@ namespace pos
 			app.UseStaticFiles();
 
 			app.UseRouting();
-
 
 			app.UseAuthentication();
 			app.UseAuthorization();
