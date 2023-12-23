@@ -72,6 +72,8 @@ namespace pos.Controllers
 
                     await HttpContext.SignInAsync(principal);
 
+                    Response.Cookies.Append("AvatarPath", user.Avatar, new CookieOptions() { Expires = DateTime.Now.AddDays(1)});
+
                     return RedirectToAction("Index", "Home");
                 }
 
@@ -148,16 +150,39 @@ namespace pos.Controllers
             return RedirectToAction("Failed", "Notifications");
         }
 
-        [HttpPost]
+        [HttpGet]
         [AllowAnonymous]
-        public IActionResult ForgotPassword([FromForm] string Email)
+        public IActionResult ForgotPassword()
         {
             ViewData["Title"] = "POS | Forgot-password";
             return View();
         }
 
-        // First Login
-        [HttpGet("/Auth/first-login")]
+		[HttpPost]
+		[AllowAnonymous]
+		public async Task<IActionResult> ForgotPassword([FromForm] string Email)
+		{
+			// Check if the email is provided
+			if (string.IsNullOrEmpty(Email))
+			{
+				// Handle the case where email is not provided
+				ModelState.AddModelError("Email", "Email is required.");
+				return View();
+			}
+
+			// Find the user by email
+			var user = await _userManager.FindByEmailAsync(Email);
+			if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+			{
+				return RedirectToAction("ForgotPasswordConfirmation");
+			}
+
+			// TODO: Send the reset link to the user via email
+			return RedirectToAction("ForgotPasswordConfirmation");
+		}
+
+		// First Login
+		[HttpGet("/Auth/first-login")]
         public IActionResult ChangePasswordFirstLogin()
         {
             ViewBag.Message = TempData["Message"];

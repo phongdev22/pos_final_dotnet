@@ -141,7 +141,6 @@ namespace pos.Controllers
             return Ok(new { code = 0, Message = "Success" });
         }
 
-
 		private bool CustomerExists(int id)
 		{
 			return _context.Customer.Any(e => e.Id == id);

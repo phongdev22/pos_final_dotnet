@@ -5,6 +5,7 @@ using pos.Config;
 using pos.Entities;
 using pos.Models.Product;
 using pos.Models;
+using pos.Utils;
 
 
 namespace pos.Controllers
@@ -41,9 +42,9 @@ namespace pos.Controllers
 		// SEARCH
 		public async Task<IActionResult> Search([FromQuery] string keyword)
 		{
-			var products = _context.Products.AsNoTracking()
+			var products = await _context.Products.AsNoTracking()
 				.Where(p => p.Barcode.Equals(keyword) || p.Name.Contains(keyword))
-				.ToList();
+				.ToListAsync();
 
 			var data = new List<ProductSearchResponse>();
 
@@ -78,7 +79,7 @@ namespace pos.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Create(Product product, [FromForm] int categoryId, [FromForm] int retailId)
+		public async Task<IActionResult> Create(Product product, [FromForm] int categoryId, [FromForm] int retailId, IFormFile image)
 		{
 			ViewData["Title"] = "POS | Create New Product";
 
@@ -86,8 +87,26 @@ namespace pos.Controllers
 
 			var result = _context.Products.Add(product);
 
+			// File Upload
+			if (image != null)
+			{
+				if (!string.IsNullOrEmpty(product.ImagePath) && !product.ImagePath.Equals("/images/default/product/no-image.png"))
+				{
+					var oldFilePath = Path.Combine("wwwroot", product.ImagePath.TrimStart('/'));
+
+					if (System.IO.File.Exists(oldFilePath))
+					{
+						System.IO.File.Delete(oldFilePath);
+					}
+				}
+
+				Helpers.ProcessUpload(image, $"product-{product.Id}.png", Path.Combine("wwwroot", "images", "products"));
+
+				product.ImagePath = $"/images/products/product-{product.Id}.png";
+			}
+
 			_context.Inventory.Add(new Inventory() { RetailStoreId = retailId, Quantity = product.Quantity, Product = product });
-			_context.SaveChanges();
+			await _context.SaveChangesAsync();
 
 			return RedirectToAction("Index");
 		}
@@ -107,7 +126,7 @@ namespace pos.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Edit(int id, Product product, int categoryId, [FromQuery] int store)
+		public async Task<IActionResult> Edit(int id, Product product, int categoryId, [FromQuery] int store, IFormFile image)
 		{
 			var _product = await _context.Products.FindAsync(id);
 
@@ -127,19 +146,44 @@ namespace pos.Controllers
 				}
 
 				// Process image file
+				if (image != null)
+				{
+					if (!string.IsNullOrEmpty(_product.ImagePath) && !_product.ImagePath.Equals("/images/default/product/no-image.png"))
+					{
+						var oldFilePath = Path.Combine("wwwroot", _product.ImagePath.TrimStart('/'));
 
+						if (System.IO.File.Exists(oldFilePath))
+						{
+							System.IO.File.Delete(oldFilePath);
+						}
+					}
+
+					_product.ImagePath = $"/images/products/product-{_product.Id}.png";
+					Helpers.ProcessUpload(image, $"product-{_product.Id}.png", Path.Combine("wwwroot", "images", "products"));
+
+				}
 			}
 			await _context.SaveChangesAsync();
 			return RedirectToAction("Index");
 		}
 		
-		[HttpDelete]		
+		[HttpDelete]
 		public async Task<IActionResult> Delete(int id)
 		{
             var product = await _context.Products.FirstOrDefaultAsync(od => od.Id == id);
 
             if (product == null) return Ok(new { code = 1, Message = "Not found!" });
-            
+
+			if (!string.IsNullOrEmpty(product.ImagePath) && !product.ImagePath.Equals("/images/default/product/no-image.png"))
+			{
+				var oldFilePath = Path.Combine("wwwroot", product.ImagePath.TrimStart('/'));
+
+				if (System.IO.File.Exists(oldFilePath))
+				{
+					System.IO.File.Delete(oldFilePath);
+				}
+			}
+
 			_context.Products.Remove(product);
             _context.SaveChanges();
 

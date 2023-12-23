@@ -5,7 +5,6 @@ namespace pos.Entities
 {
 	public class ApplicationUser : IdentityUser
 	{
-
 		public string FullName { get; set; } = string.Empty;
 		public bool Gender { get; set; } = false;
 		public bool Active { get; set; } = false;

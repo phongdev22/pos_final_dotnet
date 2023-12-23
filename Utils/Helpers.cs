@@ -34,25 +34,23 @@ namespace pos.Utils
 			return client.SendMailAsync(mailMessage);
 		}
 
-		public static bool IsValidTimestamp(string timestamp, int allowedMinutes = 1)
+		public static void ProcessUpload(IFormFile file, string fileName, string savePath)
 		{
-			DateTime inputDateTime;
-
-			// Try to parse the input timestamp
-			if (DateTime.TryParseExact(timestamp, "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.None, out inputDateTime))
+			if (file == null || string.IsNullOrEmpty(fileName) || string.IsNullOrEmpty(savePath))
 			{
-				// Get the current time
-				DateTime currentTime = DateTime.UtcNow;
+				throw new ArgumentNullException("file, fileName, and savePath cannot be null or empty");
+			}
+			var filePath = Path.Combine(savePath, fileName);
 
-				// Calculate the difference in time
-				TimeSpan difference = currentTime - inputDateTime;
-
-				// Check if the difference is within the allowed time range
-				return Math.Abs(difference.TotalMinutes) <= allowedMinutes;
+			if (System.IO.File.Exists(filePath))
+			{
+				System.IO.File.Delete(filePath);
 			}
 
-			// Return false if the timestamp couldn't be parsed
-			return false;
+			using (var fileStream = new FileStream(filePath, FileMode.Create))
+			{
+				file.CopyTo(fileStream);
+			}
 		}
 	}
 }

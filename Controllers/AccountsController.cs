@@ -5,21 +5,23 @@ using pos.Entities;
 using pos.Models;
 using pos.Utils;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace pos.Controllers
 {
 	public class AccountsController : Controller
 	{
+		private readonly IWebHostEnvironment _hostingEnvironment;
+		private readonly IConfiguration _configuration;
 		private readonly ApplicationDbContext _context;
 		private readonly UserManager<ApplicationUser> _userManager;
 		private readonly RoleManager<IdentityRole> _roleManager;
-		private readonly IConfiguration _configuration;
 		private List<IdentityRole> _roles;
 		private List<RetailStore> _stores;
 
 		private int PageSize = 10;
 
-		public AccountsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
+		public AccountsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration, IWebHostEnvironment hostingEnvironment)
 		{
 			_context = context;
 			_userManager = userManager;
@@ -27,12 +29,13 @@ namespace pos.Controllers
 			_configuration = configuration;
 			_roles = _roleManager.Roles.Where(r => r.Name != "Admin").ToList();
 			_stores = _context.RetailStores.ToList();
+			_hostingEnvironment = hostingEnvironment;
 		}
 
 		public async Task<IActionResult> Index(int page = 1, [FromQuery] int store = 1)
 		{
 			var currentUserName = User.Identity.Name;
-			
+
 			var accounts = await _userManager.Users.AsQueryable().Where(c => !c.NormalizedUserName.Equals(currentUserName) && !c.NormalizedUserName.Equals("Admin"))
 					.Skip((page - 1) * PageSize)
 					.Take(PageSize).ToListAsync();
@@ -62,7 +65,7 @@ namespace pos.Controllers
 
 			var username = appUser.Email.Split("@")[0];
 			var password = username;
-			
+
 			appUser.NormalizedUserName = username;
 			appUser.UserName = username;
 			appUser.NormalizedEmail = appUser.Email;
@@ -132,9 +135,9 @@ namespace pos.Controllers
 
 			return View(user);
 		}
-		
+
 		[HttpPost]
-		public async Task<IActionResult> Edit(string id, ApplicationUser appUser, [FromForm] string[] Roles, [FromForm]string password)
+		public async Task<IActionResult> Edit(string id, ApplicationUser appUser, [FromForm] string[] Roles, [FromForm] string password)
 		{
 			var user = await _userManager.FindByIdAsync(id);
 
@@ -168,26 +171,94 @@ namespace pos.Controllers
 			{
 				return RedirectToAction("Index");
 			}
-			
+
 			return RedirectToAction("Edit");
 		}
 
 		[HttpGet]
 		public async Task<IActionResult> Profile(string id)
 		{
+
+			ViewBag.Message = TempData["Message"] ?? null;
+
 			var profile = await _userManager.FindByNameAsync(id);
-			
-			if(profile == null) return Ok();
-			
+
+			if (profile == null) return Ok();
+
 			var roles = await _userManager.GetRolesAsync(profile);
 			ViewBag.Roles = roles;
-			
+
 			return View(profile);
 		}
 
-		[HttpPost] async Task<IActionResult> UpdateAvatar(IFormFile file)
+		[HttpPost]
+		public async Task<IActionResult> Profile(ApplicationUser user, IFormFile avatar)
 		{
-			return Ok(new {code = 0});
+
+			var current = await _userManager.FindByIdAsync(user.Id);
+
+			if (current == null) { return NotFound(); }
+
+
+			if (avatar != null)
+			{
+				if (!string.IsNullOrEmpty(current.Avatar) && !current.Avatar.Equals("/images/default/profile/user-1.png"))
+				{
+					var oldFilePath = Path.Combine("wwwroot", current.Avatar.TrimStart('/'));
+
+					if (System.IO.File.Exists(oldFilePath))
+					{
+						System.IO.File.Delete(oldFilePath);
+					}
+				}
+
+				Helpers.ProcessUpload(avatar, $"{user.Id}.png", Path.Combine("wwwroot", "images", "user"));
+
+				current.Avatar = $"/images/user/{user.Id}.png";
+				Response.Cookies.Append("AvatarPath", current.Avatar, new CookieOptions() { Expires = DateTime.Now.AddDays(1) });
+			}
+
+			current.FullName = user.FullName;
+			current.Gender = user.Gender;
+			current.PhoneNumber = user.PhoneNumber;
+			current.Email = user.Email;
+
+			var result = await _userManager.UpdateAsync(current);
+
+			if (result.Succeeded)
+			{
+				TempData["Message"] = "Update Profile Success!";
+				return RedirectToAction("Profile", new { id = current.UserName });
+			}
+			else
+			{
+				TempData["Message"] = "Update Profile Failed!";
+				return RedirectToAction("Profile", new { id = current.UserName });
+			}
+
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> ChangePassword(ApplicationUser updateUser, [FromForm] string oldPassword, [FromForm] string newPassword)
+		{
+			// Retrieve the current user
+			var user = await _userManager.FindByIdAsync(updateUser.Id);
+
+			if (user == null) return Ok();
+
+			// Verify the old password
+			var result = await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
+
+			if (result.Succeeded)
+			{
+				TempData["Message"] = "Change password Success!";
+				return RedirectToAction("Profile", new { id = user.UserName });
+			}
+			else
+			{
+				TempData["Message"] = "Change password fail!";
+				return RedirectToAction("Profile", new { id = user.UserName });
+			}
 		}
 
 		[HttpDelete]
@@ -195,12 +266,12 @@ namespace pos.Controllers
 		{
 			var user = await _userManager.FindByIdAsync(id);
 
-            if (user == null) return Ok(new { code = 1, Message = "Not found!" });
+			if (user == null) return Ok(new { code = 1, Message = "Not found!" });
 			await _userManager.DeleteAsync(user);
 
-            return Ok(new { code = 0, Message = "Success" });
-        }
-		
+			return Ok(new { code = 0, Message = "Success" });
+		}
+
 		private async Task UpdateUserRoles(ApplicationUser user, string[] roles)
 		{
 			var existingRoles = await _userManager.GetRolesAsync(user);

@@ -2,8 +2,9 @@
 @inject MyDataService MyDataService;
 @{
     Layout = "_Layout";
-    // ViewData["Username"] = MyDataService.Username;
+    ViewData["Username"] = MyDataService.Username;
     ViewData["Email"] = MyDataService.Email;
     ViewData["Name"] = MyDataService.Name;
     ViewData["Avatar"] = MyDataService.Avatar;
+    ViewData["FullName"] = "";
 }
