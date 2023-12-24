@@ -57,7 +57,7 @@
 								@Html.DisplayFor(modelItem => item.Address)
 							</td>
 							<td>
-								<a asp-action="Details" asp-route-id="@item.Id"
+								<a asp-action="History" asp-controller="Orders" asp-route-id="@item.PhoneNumber"
 								   class="btn btn-sm btn-danger badge mr-2"
 								   data-toggle="tooltip"
 								   data-placement="top"

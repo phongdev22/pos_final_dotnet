@@ -1,4 +1,9 @@
-﻿<div class="iq-top-navbar w-100">
+﻿@{
+	var IsAdmin = User.IsInRole("Admin");
+	var IsManager = User.IsInRole("Manager");
+	var IsEmployee = User.IsInRole("Employee");
+}
+<div class="iq-top-navbar w-100">
 	<div class="iq-navbar-custom">
 		<nav class="navbar navbar-expand-lg navbar-light p-0" style="height: 73px;">
 			<div class="iq-search-bar device-search">
@@ -9,14 +14,23 @@
 			</div>
 
 			<div class="d-flex justify-content-between">
-				<a href="/Home" class="btn text-uppercase btn-md mx-2">Sales</a>
+
+				@if (IsManager || IsEmployee)
+				{
+					<a href="/Home" class="btn text-uppercase btn-md mx-2">Sales</a>
+				}
 				<a href="/Products" class="btn text-uppercase btn-md mx-2">Products</a>
-				<a href="/Categories" class="btn text-uppercase btn-md mx-2">Collections</a>
-				<a href="/Accounts" class="btn text-uppercase btn-md mx-2">Accounts</a>
-@* 				<a href="/Orders" class="btn text-uppercase btn-md mx-2">Orders</a> *@
+				<a href="/Categories" class="btn text-uppercase btn-md mx-2">Categories</a>
 				<a href="/Customers" class="btn text-uppercase btn-md mx-2">Customers</a>
 				<a href="/Orders" class="btn text-uppercase btn-md mx-2">Orders</a>
-				<a href="/RetailStores" class="btn text-uppercase btn-md mx-2">Stores</a>
+				@* <a href="/Reports" class="btn text-uppercase btn-md mx-2">Reports</a> *@
+
+				@if (IsAdmin)
+				{
+					<a href="/Accounts" class="btn text-uppercase btn-md mx-2">Accounts</a>
+					<a href="/RetailStores" class="btn text-uppercase btn-md mx-2">Stores</a>
+				}
+
 			</div>
 
 			<div class="d-flex align-items-center">
@@ -30,7 +44,7 @@
 				</button>
 				<div class="collapse navbar-collapse" id="navbarSupportedContent">
 					<ul class="navbar-nav ml-auto navbar-list align-items-center">
-						<li>
+						<li class="d-none">
 							<button id="new-order"
 									type="button"
 									class="btn border add-btn shadow-none mx-2 d-none d-md-block"
@@ -61,22 +75,36 @@
 						</li>
 						<li class="nav-item nav-icon dropdown caption-content">
 							<a href="#" class="search-toggle dropdown-toggle" id="dropdownMenuButton4" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-								<img src="~/images/user/1.png" class="img-fluid" alt="user" style="border-radius: 50%; border:1px solid #dedbd2" />
+								@if (ViewData["Avatar"] != null)
+								{
+									<img src="@ViewData["Avatar"]" class="img-fluid" alt="user" style="border-radius: 50%; border:1px solid #dedbd2" />
+								}
+								else
+								{
+									<img src="~/images/user/1.png" class="img-fluid" alt="user" style="border-radius: 50%; border:1px solid #dedbd2" />
+								}
 							</a>
 							<div class="iq-sub-dropdown dropdown-menu" aria-labelledby="dropdownMenuButton">
 								<div class="card shadow-none m-0">
 									<div class="card-body p-0 text-center">
 										<div class="media-body profile-detail text-center">
-											<img src="/images/page-img/profile-bg.jpg"
+											<img src="/images/default/background/profile-bg.jpg"
 												 alt="profile-bg"
-												 class="rounded-top img-fluid mb-4"/>
-											<img src="~/images/user/1.png" class="rounded profile-img img-fluid avatar-70" />
+												 class="rounded-top img-fluid mb-4" />
+											@if (ViewData["Avatar"] != null)
+											{
+												<img src="@ViewData["Avatar"]" class="rounded profile-img img-fluid avatar-70" />
+											}
+											else
+											{
+												<img src="~/images/user/1.png" class="rounded profile-img img-fluid avatar-70" />
+											}
 										</div>
 										<div class="p-3">
-											<h5 class="mb-1">email@gmail.com</h5>
-											<p class="mb-0">Since 10 march, 2020</p>
+											<h5 class="mb-1">@ViewData["Email"]</h5>
+											<p class="mb-0">@ViewData["FullName"]</p>
 											<div class="d-flex align-items-center justify-content-center mt-3">
-												<a href="/accounts/profile/" class="btn border mr-2">Profile</a>
+												<a href="/Accounts/Profile/@ViewData["Name"]" class="btn border mr-2">Profile</a>
 												<a href="/Auth/Logout" class="btn border">Sign Out</a>
 											</div>
 										</div>

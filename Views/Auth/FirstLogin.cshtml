@@ -1,49 +1,71 @@
 ﻿@{
-    Layout = "/Views/Shared/_Layout_Simple.cshtml";
+	ViewData["Title"] = "Change password first login";
+	Layout = "/Views/Shared/_Layout_Simple.cshtml";
 }
 <section class="login-content">
-    <div class="container">
-        <div class="row align-items-center justify-content-center height-self-center">
-            <div class="col-lg-8">
-                <div class="card auth-card">
-                    <div class="card-body p-0">
-                        <div class="d-flex align-items-center auth-content" style="max-height: 400px;">
-                            <div class="col-lg-7 align-self-center">
-                                <div class="p-3">
-                                    <h2 class="mb-2">Change Password</h2>
-                                    @if(ViewBag.Message != null){
-                                        <p>@ViewBag.Message</p>
-                                    }
-                                    else
-                                    {
-                                        <p>Enter your new password for the first time you log in the system!</p>
-                                    }
-                                    <form action="/auth/first-login" method="post">
-                                        <div class="row">
-                                            <div class="col-lg-12">
-                                                <div class="floating-label form-group">
-                                                    <input placeholder="New password" name="password" class="floating-input form-control" type="password" required />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-lg-12">
-                                                <div class="floating-label form-group">
-                                                    <input placeholder="Confirm New Password" name="confirmPassword" class="floating-input form-control" type="password" required />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary">Submit</button>
-                                    </form>
-                                </div>
-                            </div>
-                            <div class="col-lg-5 content-right">
-                                <img src="/images/login/01.png" class="img-fluid image-right" alt="" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+	<div class="container">
+		<div class="row align-items-center justify-content-center height-self-center">
+			<div class="col-lg-8">
+				<div class="card auth-card">
+					<div class="card-body p-0">
+						<div class="d-flex align-items-center auth-content" style="max-height: 400px;">
+							<div class="col-lg-7 align-self-center">
+								<div class="p-3">
+									<h2 class="mb-2">Change Password</h2>
+									@if (ViewBag.Message != null)
+									{
+										<p>@ViewBag.Message</p>
+									}
+									else
+									{
+										<p>Enter your new password for the first time you log in the system!</p>
+									}
+									<form action="/auth/first-login" method="post">
+										<div class="row">
+											<div class="col-lg-12">
+												<div class="floating-label form-group">
+													<input placeholder="New password" name="password" class="floating-input form-control" type="password" required />
+												</div>
+											</div>
+										</div>
+										<div class="row">
+											<div class="col-lg-12">
+												<div class="floating-label form-group">
+													<input placeholder="Confirm New Password" name="confirmPassword" class="floating-input form-control" type="password" required />
+												</div>
+											</div>
+										</div>
+										<div class="row px-3">
+											<button type="submit" class="btn btn-primary">Submit</button>
+											<a asp-action="Logout" class="btn btn-success ml-4">Log out</a>
+										</div>
+									</form>
+								</div>
+							</div>
+							<div class="col-lg-5 content-right">
+								<img src="/images/login/01.png" class="img-fluid image-right" alt="" />
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </section>
+
+@section Scripts {
+	<script>
+		document.querySelector("form").addEventListener("submit", function (event) {
+			event.preventDefault();
+
+			const password = document.querySelector("input[name=password]").value
+			const confirm = document.querySelector("input[name=confirmPassword]").value
+
+			if (password != confirm) {
+				return;
+			}
+
+			this.submit();
+		})
+	</script>
+}

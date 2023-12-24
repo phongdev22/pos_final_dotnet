@@ -114,7 +114,7 @@ async function getCusInfo(inputField) {
                 document.querySelector("#name").value = data.customer.name;
                 document.querySelector("#address").value = data.customer.address;
                 btnHistory.classList.remove("disabled");
-                btnHistory.setAttribute("href", "/orders/all/" + phone);
+                btnHistory.setAttribute("href", "/orders/history/" + phone);
             } else {
                 btnHistory.classList.add("disabled");
             }

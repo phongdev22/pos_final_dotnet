@@ -1,8 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using pos.Config;
 using pos.Entities;
+using pos.Realtime;
+using pos.Services;
+using System.Net;
 
 namespace pos
 {
@@ -16,6 +20,11 @@ namespace pos
 
 			// Add services to the container.
 			builder.Services.AddControllersWithViews();
+			builder.Services.AddControllers().AddJsonOptions(options =>
+			{
+				options.JsonSerializerOptions.PropertyNamingPolicy = null;
+
+			});
 
             // DB Configuration
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -47,7 +56,6 @@ namespace pos
 				options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 				options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 				options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-
 			}).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
 				{
 					options.LoginPath = "/Auth"; // Đường dẫn đăng nhập của bạn
@@ -58,16 +66,18 @@ namespace pos
 					options.SlidingExpiration = true;
 				});
 
-			// builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddDebug());
+			//builder.Services.AddAuthorization
+			builder.Services.AddSingleton<MyDataService>();
 
-			builder.Services.AddAuthorization();
+			builder.Services.AddSignalR();
+
 
 			var app = builder.Build();
 
 			// Configure the HTTP request pipeline.
 			if (!app.Environment.IsDevelopment())
 			{
-				app.UseExceptionHandler("/Home/Error");
+				app.UseExceptionHandler("/Error");
 				app.UseHsts();
 			}
 
@@ -79,8 +89,10 @@ namespace pos
 			app.UseAuthentication();
 			app.UseAuthorization();
 
-			//app.UseMiddleware<FirstLoginMiddleware>();
-			//app.UseMiddleware<UserInfoMiddleware>();
+			app.UseMiddleware<RedirectMiddleware>();
+
+			app.MapHub<ProductHub>("/productHub");
+			app.MapHub<OrderHub>("/orderHub");
 
 			app.MapControllerRoute(
 				name: "default",

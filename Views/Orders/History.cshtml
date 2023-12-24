@@ -1,0 +1,98 @@
+﻿@model IEnumerable<pos.Entities.Order>;
+@{
+	ViewData["Title"] = "POS | History";
+}
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-lg-4">
+			<a href="/" class="btn mx-0 p-0 mb-3">Back to list</a>
+			<h4 class="mb-3">History</h4>
+			<pre>
+
+			</pre>
+		</div>
+		<div class="col-lg-3 col-md-4">
+			<div class="card card-block card-stretch card-height">
+				<div class="card-body">
+					<div class="d-flex align-items-center mb-4 card-total-sale">
+						<div>
+							<p class="mb-2">Total Order:</p>
+							<h4>@ViewBag.Total</h4>
+						</div>
+					</div>
+					<div class="iq-progress-bar mt-2">
+						<span class="bg-info iq-progress progress-1" data-percent="50"> </span>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-3 col-md-4">
+			<div class="card card-block card-stretch card-height">
+				<div class="card-body">
+					<div class="d-flex align-items-center mb-4 card-total-sale">
+						<div>
+							<p class="mb-2">Total spending:</p>
+							<h4>@ViewBag.TotalSpending.ToString("N0")đ</h4>
+						</div>
+					</div>
+					<div class="iq-progress-bar mt-2">
+						<span class="bg-danger iq-progress progress-1" data-percent="50"> </span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-lg-12">
+
+			<div class="col-lg-12">
+				<div class="table-responsive rounded mb-3">
+					<table class="data-table table mb-0 tbl-server-info">
+						<thead class="bg-white text-uppercase">
+							<tr class="ligth ligth-data">
+								<th>Invoice Id</th>
+								<th>Date</th>
+								<th>Customer</th>
+								<th>Total</th>
+								<th>Customer Money</th>
+								<th>Return Back</th>
+								<th>Status</th>
+							</tr>
+						</thead>
+						<tbody class="ligth-body">
+
+							@foreach (var order in Model)
+							{
+								<tr id="data-{{this._id}}">
+									<td class="text text-truncate"
+										style="max-width:40px"
+										data-toggle="tooltip"
+										data-placement="top"
+										data-original-title="{{this._id}}">
+										@order.OrderId
+									</td>
+									<td>@order.DateCreation.ToString("dd-MM-yyyy")</td>
+									<td>@order.Customer.Name</td>
+									<td>@order.Total.ToString("N0")đ</td>
+									<td>@order.GivenMoney.ToString("N0")đ</td>
+
+									@if (order.Status)
+									{
+										<td>@((order.GivenMoney - order.Total).ToString("N0"))đ</td>
+										<td><div class="badge badge-success">Paid</div></td>
+									}else{
+										<td>0đ</td>
+										<td><div class="badge badge-danger">Unpaid</div></td>
+									}
+									<td>@(order?.User?.FullName ?? "N/A")</td>
+								</tr>
+							}
+
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<!-- Page End -->
+	</div>
+</div>

@@ -1,0 +1,67 @@
+﻿@{
+	Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Verify Account</title>
+	<!-- Bootstrap CSS -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+	<div class="container mt-5">
+		<!-- Alert for Account Verification Status -->
+		<div class="alert alert-danger text-center" role="alert" id="verificationAlert">
+			@ViewBag.Message
+			<span id="countdown">60</span> seconds.<br>
+			If you don't want to wait, click <a href="/">here</a> to redirect immediately.
+		</div>
+
+		<!-- JavaScript to redirect after countdown -->
+		<script>
+			// Function to redirect after countdown
+			function redirectToFailPage() {
+				window.location.href = `${window.location.origin}/auth/login`;
+			}
+
+			// Countdown function
+			function startCountdown(seconds) {
+				let countdown = seconds;
+
+				function updateCountdown() {
+					document.getElementById('countdown').innerText = countdown;
+					countdown--;
+
+					if (countdown < 0) {
+						redirectToFailPage();
+					}
+				}
+
+				// Initial call
+				updateCountdown();
+
+				// Update every second
+				const countdownInterval = setInterval(updateCountdown, 1000);
+
+				// Clear interval after specified seconds
+				setTimeout(() => {
+					clearInterval(countdownInterval);
+				}, (seconds + 1) * 1000); // Add 1 second to ensure clearInterval is called
+			}
+
+			// Start the countdown when the page loads
+			document.addEventListener('DOMContentLoaded', function () {
+				startCountdown(60); // Set the countdown time in seconds
+			});
+		</script>
+
+		<!-- Bootstrap JS (optional) -->
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	</div>
+
+</body>
+</html>

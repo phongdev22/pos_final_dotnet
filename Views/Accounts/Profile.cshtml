@@ -1,0 +1,175 @@
+﻿@using pos.Entities
+@model ApplicationUser
+@{
+	ViewData["Title"] = "POS | Profile";
+}
+<div class="container-fluid">
+	<div class="row px-3">
+		<div class="col-lg-8">
+			<div class="card card-block card-stretch card-height">
+				<div class="card-body">
+					<ul class="d-flex nav nav-pills mb-3 text-center profile-tab" id="profile-pills-tab" role="tablist">
+						<li class="nav-item">
+							<a class="nav-link active"
+							   data-toggle="pill"
+							   href="#profile2"
+							   role="tab"
+							   aria-selected="false">Personal Information</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" data-toggle="pill" href="#profile3" role="tab" aria-selected="false">
+								Change
+								Password
+							</a>
+						</li>
+					</ul>
+					<div class="profile-content tab-content">
+						<div id="profile2" class="tab-pane fade active show">
+							<form asp-action="Profile" method="post" enctype="multipart/form-data">
+								<input name="Id" value="@Model.Id" type="hidden"/>
+								<div class="form-group row align-items-center">
+									<div class="col-md-12">
+										<div class="profile-img-edit">
+											<div class="crm-profile-img-edit">
+												<img class="crm-profile-pic rounded-circle avatar-100"
+													 src="@Model.Avatar"
+													 alt="profile-pic"
+													 style="object-fit: cover;"
+													 id="preview-avatar"/>
+												<div class="crm-p-image bg-primary d-flex justify-content-center align-items-center">
+													<label for="avatar" class="text-white text-center m-0 pointer">
+														<i class="las la-pen upload-button"></i>
+													</label>
+													<input id="avatar"
+														   name="avatar"
+														   class="file-upload"
+														   type="file"
+														   accept="image/*" />
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="row align-items-center">
+									<div class="form-group col-sm-6">
+										<label asp-for="UserName">Username:</label>
+										<input type="text" class="form-control" disabled asp-for="UserName" />
+									</div>
+									<div class="form-group col-sm-6">
+										<label asp-for="FullName">Full Name:</label>
+										<input name="fullName" type="text" class="form-control" asp-for="FullName" />
+									</div>
+									<div class="form-group col-sm-6">
+										<label asp-for="PhoneNumber">Phone Number:</label>
+										<input name="phoneNumber" type="text" class="form-control" asp-for="PhoneNumber" />
+									</div>
+
+									<div class="col-sm-6 d-flex justify-content-start">
+										<div class="form-group col-lg-6 mr-3">
+											<label>Roles *</label>
+											<div>
+												@foreach (var role in ViewBag.Roles)
+												{
+													<div class="custom-control custom-radio custom-control-inline">
+														<input checked type="radio" id="customRadio6" name="gender" class="custom-control-input" disabled />
+														<label class="custom-control-label" for="customRadio6"> @role </label>
+													</div>
+												}
+											</div>
+										</div>
+										<div class="form-group">
+											<label>Gender: </label>
+											<div class="d-flex align-items-center mt-2">
+												<div class="custom-control custom-checkbox custom-checkbox-color-check custom-control-inline">
+													<input asp-for="Gender" type="radio" value="true" id="Male" class="custom-control-input">  @* checked="@(Model.Gender == true)" *@
+													<label class="custom-control-label" for="Male">Male</label>
+												</div>
+												<div class="custom-control custom-checkbox custom-checkbox-color-check custom-control-inline"> 
+													<input asp-for="Gender" type="radio" value="false" id="Female" class="custom-control-input">  @* checked="@(Model.Gender == false)" *@
+													<label class="custom-control-label" for="Female">Female</label>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<div class="form-group col-sm-6">
+										<label for="email">Email:</label>
+										<input name="email"
+											   type="text"
+											   class="form-control"
+											   id="email"
+											   asp-for="Email" />
+									</div>
+									<div class="form-group col-sm-6">
+										<label >Retail Store</label>
+										<input type="text" class="form-control" disabled value="@(Model.RetailStore == null ? "N/A" : Model.RetailStore.StoreName) " />
+									</div>
+								</div>
+								<button type="submit" class="btn btn-primary mr-2">Save Changes</button>
+							</form>
+						</div>
+						<div id="profile3" class="tab-pane fade">
+							<form asp-action="ChangePassword" enctype="application/x-www-form-urlencoded">
+								<input name="Id" value="@Model.Id" hidden/>
+								<div class="form-group">
+									<label for="cpass">Old Password Password:</label>
+									<a href="javascripe:void();" class="float-right">Forgot Password</a>
+									<input type="Password" class="form-control" id="cpass" value="" name="oldPassword" />
+								</div>
+								<div class="form-group">
+									<label for="new-pass">New Password:</label>
+									<input type="Password" class="form-control" id="new-pass" value="" name="newPassword" />
+								</div>
+								<div class="form-group">
+									<label for="confirm-pass">Confirm Password:</label>
+									<input type="Password"
+										   class="form-control"
+										   id="confirm-pass"
+										   value=""
+										   name="confirmNewPassword" />
+								</div>
+								<button type="submit" class="btn btn-primary mr-2">Save Changes</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-4">
+			@if (ViewBag.Message != null)
+			{
+				<div id="Message" class="alert bg-white alert-primary" role="alert">
+					<div class="iq-alert-text" id="Message">@ViewBag.Message</div>
+				</div>
+			}
+		</div>
+	</div>
+</div>
+
+@section Scripts{
+	@if (ViewBag.Message != null)
+	{
+		<script>
+			setTimeout(function () {
+				document.getElementById('Message').style.display = "none";
+			}, 5000);
+		</script>
+
+	}
+	<script>
+		document.querySelector("#avatar").addEventListener("change", (event) => {
+			const inputElement = event.target;
+
+			if (inputElement.files && inputElement.files[0]) {
+				const fileReader = new FileReader();
+
+				fileReader.onload = function (e) {
+					const imageElement = document.querySelector("#preview-avatar");
+					imageElement.src = e.target.result;
+				};
+
+				fileReader.readAsDataURL(inputElement.files[0]);
+			}
+		})
+	</script>
+}

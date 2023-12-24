@@ -7,10 +7,30 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\images\default\profile\01.jpg" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\default\profile\02.jpg" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\default\profile\03.jpg" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\default\profile\04.jpg" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\default\profile\05.jpg" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\default\profile\06.jpg" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\default\profile\07.jpg" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\default\profile\08.jpg" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\default\profile\09.jpg" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\default\profile\1.jpg" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\default\profile\1.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\default\profile\10.jpg" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\default\profile\11.jpg" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\default\profile\11.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\default\profile\12.jpg" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\default\profile\i1.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Common" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
@@ -29,7 +49,31 @@
 
   <ItemGroup>
     <Folder Include="Models\AccountModel\" />
-    <Folder Include="Models\Error\" />
+    <Folder Include="wwwroot\images\products\" />
+    <Folder Include="wwwroot\images\user\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot\images\default\profile\user-1.png">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\images\default\profile\user-3.jpg">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\images\default\profile\user-4.jpg">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\images\default\profile\user-5.jpg">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\images\default\profile\user-6.jpg">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using pos.Config;
 using pos.Entities;
 
 namespace pos.Controllers
 {
+	[Authorize]
 	public class CustomersController : Controller
 	{
 		private readonly ApplicationDbContext _context;
@@ -138,7 +140,6 @@ namespace pos.Controllers
 
             return Ok(new { code = 0, Message = "Success" });
         }
-
 
 		private bool CustomerExists(int id)
 		{
