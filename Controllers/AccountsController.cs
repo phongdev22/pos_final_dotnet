@@ -6,6 +6,8 @@ using pos.Models;
 using pos.Utils;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Microsoft.DiaSymReader;
+using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 
 namespace pos.Controllers
 {
@@ -173,6 +175,25 @@ namespace pos.Controllers
 			}
 
 			return RedirectToAction("Edit");
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> ChangeStatus([FromQuery]string id)
+		{
+			var user = await _userManager.FindByIdAsync(id);
+
+			if(user == null) return Ok(new {code= 1, Message = "Cannot change Failed!" });
+
+			user.Active = !user.Active;
+
+			var updateResult = await _userManager.UpdateAsync(user);
+
+			if (updateResult.Succeeded)
+			{
+				return Ok(new {code = 0, Message = "Change Status Success!", status = user.Active});
+			}
+
+			return Ok(new { code = 1, Message = "Change Status Failed!" });
 		}
 
 		[HttpGet]

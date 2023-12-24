@@ -58,8 +58,8 @@
 										<td>@account.UserName</td>
 										<td>@account.PhoneNumber</td>
 										<td>@account.Email</td>
-										<td onclick="handleUpdateStatus(event)" data-username="@account.Id">
-											@if (account.EmailConfirmed)
+										<td onclick="handleUpdateStatus(event)" data-id="@account.Id">
+											@if (account.Active)
 											{
 												<span class="btnStatus badge bg-success">Active</span>
 											}else{
@@ -124,6 +124,7 @@
 </div>
 
 @section Scripts {
+	<script src="~/js/changeStatus.js"></script>
 	<script>
 		async function handleResend(button) {
 			const { link } = button.dataset;

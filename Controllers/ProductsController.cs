@@ -6,6 +6,9 @@ using pos.Entities;
 using pos.Models.Product;
 using pos.Models;
 using pos.Utils;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
+using pos.Realtime;
 
 
 namespace pos.Controllers
@@ -14,10 +17,23 @@ namespace pos.Controllers
 	public class ProductsController : Controller
 	{
 		private readonly ApplicationDbContext _context;
+		private readonly IHubContext<ProductHub> _hubContext;
+		private readonly UserManager<ApplicationUser> _userManager;
+
 		public int PageSize { get; set; } = 10;
-		public ProductsController(ApplicationDbContext context)
+		public ProductsController(ApplicationDbContext context, IHubContext<ProductHub> hubContext, UserManager<ApplicationUser> userManager)
 		{
 			_context = context;
+			_hubContext = hubContext;
+			_userManager = userManager;
+		}
+		
+
+		private async void SendMessage(string nameMessage, Product product)
+		{
+			var loggedInUserIds = _userManager.Users.Where(u => u.UserName != null && u.UserName != "").Select(u => u.Id);
+
+			await _hubContext.Clients.Users(loggedInUserIds.ToList()).SendAsync(nameMessage, product);
 		}
 
 		public IActionResult Index(int page = 1, [FromQuery] int store = 1)
@@ -106,7 +122,7 @@ namespace pos.Controllers
 			}
 
 			_context.Inventory.Add(new Inventory() { RetailStoreId = retailId, Quantity = product.Quantity, Product = product });
-			await _context.SaveChangesAsync();
+			var change = await _context.SaveChangesAsync();
 
 			return RedirectToAction("Index");
 		}

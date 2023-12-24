@@ -1,4 +1,10 @@
-﻿<!DOCTYPE html>
+﻿@{
+	var IsAdmin = User.IsInRole("Admin");
+	var IsManager = User.IsInRole("Manager");
+	var IsEmployee = User.IsInRole("Employee");
+}
+
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -24,6 +30,46 @@
 	<script src="~/js/backend-bundle.min.js"></script>
 	<script src="~/js/app.js"></script>
 	<script src="~/js/deleteFeature.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
+
+	@if (IsAdmin)
+	{
+
+		<script>
+			const hubConnections = [
+				{ name: "productHub", url: "/productHub" },
+				{ name: "orderHub", url: "/orderHub" }
+			];
+
+			async function startConnection(connectionInfo) {
+				const connection = new signalR.HubConnectionBuilder()
+					.withUrl(connectionInfo.url)
+					.configureLogging(signalR.LogLevel.Information)
+					.build();
+
+				try {
+					await connection.start();
+					console.log(`SignalR Connected to ${connectionInfo.name} at ${connection.baseUrl}`);
+				} catch (err) {
+					console.log(err);
+					setTimeout(() => startConnection(connectionInfo), 5000);
+				}
+
+				connection.onclose(async () => {
+					await startConnection(connectionInfo);
+				});
+			}
+
+			async function startAllConnections() {
+				for (const connectionInfo of hubConnections) {
+					await startConnection(connectionInfo);
+				}
+			}
+
+			startAllConnections();
+		</script>
+		
+	}
 
 	@await RenderSectionAsync("Scripts", required: false)
 </body>

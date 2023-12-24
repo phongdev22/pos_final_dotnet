@@ -49,7 +49,6 @@
 
   <ItemGroup>
     <Folder Include="Models\AccountModel\" />
-    <Folder Include="Realtime\" />
     <Folder Include="wwwroot\images\products\" />
     <Folder Include="wwwroot\images\user\" />
   </ItemGroup>
