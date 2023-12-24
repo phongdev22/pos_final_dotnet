@@ -5,9 +5,6 @@ using pos.Entities;
 using pos.Models;
 using pos.Utils;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using Microsoft.DiaSymReader;
-using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 
 namespace pos.Controllers
 {

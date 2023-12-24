@@ -32,43 +32,9 @@
 	<script src="~/js/deleteFeature.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
 
-	@if (IsAdmin)
+	@if (IsAdmin || IsEmployee || IsManager)
 	{
-
-		<script>
-			const hubConnections = [
-				{ name: "productHub", url: "/productHub" },
-				{ name: "orderHub", url: "/orderHub" }
-			];
-
-			async function startConnection(connectionInfo) {
-				const connection = new signalR.HubConnectionBuilder()
-					.withUrl(connectionInfo.url)
-					.configureLogging(signalR.LogLevel.Information)
-					.build();
-
-				try {
-					await connection.start();
-					console.log(`SignalR Connected to ${connectionInfo.name} at ${connection.baseUrl}`);
-				} catch (err) {
-					console.log(err);
-					setTimeout(() => startConnection(connectionInfo), 5000);
-				}
-
-				connection.onclose(async () => {
-					await startConnection(connectionInfo);
-				});
-			}
-
-			async function startAllConnections() {
-				for (const connectionInfo of hubConnections) {
-					await startConnection(connectionInfo);
-				}
-			}
-
-			startAllConnections();
-		</script>
-		
+		<script src="~/js/realtime.js"></script>
 	}
 
 	@await RenderSectionAsync("Scripts", required: false)
