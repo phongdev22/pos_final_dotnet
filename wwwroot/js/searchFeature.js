@@ -109,10 +109,10 @@ async function getCusInfo(inputField) {
     if (phone) {
         await fetch(url + phone).then(async (res) => {
             const data = await res.json();
-            console.log(data)
+            console.log(data.customer)
             if (data.code === 0) {
-                document.querySelector("#name").value = data.customer.name;
-                document.querySelector("#address").value = data.customer.address;
+                document.querySelector("#name").value = data.customer.Name;
+                document.querySelector("#address").value = data.customer.Address;
                 btnHistory.classList.remove("disabled");
                 btnHistory.setAttribute("href", "/orders/history/" + phone);
             } else {

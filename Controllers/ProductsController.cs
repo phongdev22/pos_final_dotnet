@@ -6,10 +6,6 @@ using pos.Entities;
 using pos.Models.Product;
 using pos.Models;
 using pos.Utils;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.SignalR;
-using pos.Realtime;
-
 
 namespace pos.Controllers
 {
@@ -17,32 +13,20 @@ namespace pos.Controllers
 	public class ProductsController : Controller
 	{
 		private readonly ApplicationDbContext _context;
-		private readonly IHubContext<ProductHub> _hubContext;
-		private readonly UserManager<ApplicationUser> _userManager;
 
 		public int PageSize { get; set; } = 10;
-		public ProductsController(ApplicationDbContext context, IHubContext<ProductHub> hubContext, UserManager<ApplicationUser> userManager)
+		public ProductsController(ApplicationDbContext context)
 		{
 			_context = context;
-			_hubContext = hubContext;
-			_userManager = userManager;
 		}
 		
-
-		private async void SendMessage(string nameMessage, Product product)
-		{
-			var loggedInUserIds = _userManager.Users.Where(u => u.UserName != null && u.UserName != "").Select(u => u.Id);
-
-			await _hubContext.Clients.Users(loggedInUserIds.ToList()).SendAsync(nameMessage, product);
-		}
-
 		public IActionResult Index(int page = 1, [FromQuery] int store = 1)
 		{
 			ViewData["Title"] = "POS | List Products";
 			var retailStores = _context.RetailStores.ToList();
 
-			var products = _context.Products
-					.Where(p => p.Inventories.Any(i => i.RetailStoreId == store))
+			var inventory = _context.Inventory
+					.Where(inv => inv.RetailStoreId == store)
 					.Skip((page - 1) * PageSize)
 					.Take(PageSize)
 					.ToList();
@@ -50,7 +34,7 @@ namespace pos.Controllers
 			ViewBag.Store = store;
 			ViewBag.Stores = retailStores;
 
-			var Page = new PageViewModel<Product>() { Items = products, PageNumber = page, PageSize = PageSize, TotalItems = products.Count };
+			var Page = new PageViewModel<Inventory>() { Items = inventory, PageNumber = page, PageSize = PageSize, TotalItems = inventory.Count };
 
 			return View(Page);
 		}
@@ -99,8 +83,20 @@ namespace pos.Controllers
 		{
 			ViewData["Title"] = "POS | Create New Product";
 
-			product.CategoryId = categoryId;
+			var existedProduct = _context.Products.FirstOrDefault(p => p.Barcode.Equals(product.Barcode));
+			
+			if(existedProduct != null)
+			{
+				// increase quantity head
+				existedProduct.Quantity = existedProduct.Quantity + product.Quantity;
 
+				// add in an inventory
+				_context.Inventory.Add(new Inventory() { RetailStoreId = retailId, Quantity = product.Quantity, Product = existedProduct });
+				await _context.SaveChangesAsync();
+				return RedirectToAction("Index");
+			}
+
+			product.CategoryId = categoryId;
 			var result = _context.Products.Add(product);
 
 			// File Upload
@@ -134,11 +130,13 @@ namespace pos.Controllers
 
 			var retailStore = _context.RetailStores.FirstOrDefault(rs => rs.Id == store);
 			var Categories = _context.Categories.ToList();
-			var product = _context.Products.FirstOrDefault(x => x.Id == id);
+
+			var inventory = _context.Inventory.FirstOrDefault(x => x.ProductId == id && x.RetailStoreId == store);
 
 			ViewBag.Store = retailStore;
+			ViewBag.Quantity = inventory.Quantity;
 
-			return View(new ProductModel() { Product = product, Categories = Categories });
+			return View(new ProductModel() { Product = inventory.Product, Categories = Categories });
 		}
 
 		[HttpPost]
@@ -148,19 +146,20 @@ namespace pos.Controllers
 
 			if (_product != null)
 			{
+				var inventory = await _context.Inventory.FirstOrDefaultAsync(inv => inv.ProductId == id && inv.RetailStoreId == store);
+
+				if(inventory != null)
+				{
+					_product.Quantity = _product.Quantity - inventory.Quantity + product.Quantity;
+					inventory.Quantity = product.Quantity;
+				}
+
 				_product.Name = product.Name;
 				_product.Price = product.Price;
 				_product.Cost = product.Cost;
 				_product.CategoryId = categoryId;
 				_product.Barcode = product.Barcode;
-				_product.Quantity = product.Quantity;
-
-				var inventory = await _context.Inventory.FirstOrDefaultAsync(inv => inv.ProductId == id && inv.RetailStoreId == store);
-				if (inventory != null)
-				{
-					inventory.Quantity = product.Quantity;
-				}
-
+				
 				// Process image file
 				if (image != null)
 				{
@@ -189,6 +188,8 @@ namespace pos.Controllers
             var product = await _context.Products.FirstOrDefaultAsync(od => od.Id == id);
 
             if (product == null) return Ok(new { code = 1, Message = "Not found!" });
+
+			if(!product.isDelete) { return Ok(new {code = 1, Message = "Cannot delete product because it existed in orders!"});}
 
 			if (!string.IsNullOrEmpty(product.ImagePath) && !product.ImagePath.Equals("/images/default/product/no-image.png"))
 			{

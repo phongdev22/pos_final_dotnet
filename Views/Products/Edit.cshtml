@@ -105,7 +105,7 @@
 									<label>Quantity *</label>
 									<input name="Quantity"
 										   type="text"
-										   value="@Model.Product.Quantity"
+										   value="@(ViewBag.Quantity == null ? 0 : ViewBag.Quantity)"
 										   class="form-control"
 										   placeholder="Enter Quantity"
 										   required />

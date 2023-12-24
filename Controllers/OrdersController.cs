@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Linq;
 using pos.Config;
 using pos.Entities;
 using pos.Models.Order;
@@ -140,6 +139,16 @@ namespace pos.Controllers
 		public async Task<IActionResult> Complete(string id, [FromBody] Order cash)
 		{
 			var order = await _context.Orders.FirstOrDefaultAsync(od => od.OrderId.Equals(id));
+
+			foreach (var orderDetail in order.OrderDetails)
+			{
+				var product = _context.Products.FirstOrDefault(p => p.Id == orderDetail.ProductId);
+				if(product != null)
+				{
+					product.Quantity = product.Quantity -  orderDetail.Quantity;
+					product.isDelete = false;
+				}
+			}
 
 			if (order == null) return Ok(new { code = 1, Message = "Not found!" }); ;
 			order.GivenMoney = cash.GivenMoney;
