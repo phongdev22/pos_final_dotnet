@@ -90,6 +90,7 @@ namespace pos.Controllers
 				if (biller != null)
 				{
 					order.User = biller;
+					//order.RetailStore = biller.RetailStore;
 				}
 			}
 

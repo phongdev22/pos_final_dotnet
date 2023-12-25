@@ -8,11 +8,15 @@
 	<div class="row">
 		<div class="col-lg-4">
 			<div class="card card-transparent card-block card-stretch card-height border-none">
-				<div class="card-body p-0 mt-lg-2 mt-0">
-					<h3 class="mb-3 text-capitalize">Hi {{user.fullName}}, {{greeting}}</h3>
+				<div class="card-body p-0 mt-lg-4 mt-0">
 					<p class="mb-0 mr-4">
 						Your dashboard gives you views of key performance or business process.
 					</p>
+					<input id="storeId" value="@Model.RetailStore.Id" hidden />
+					<div id="rangedatepicker">
+						<label for="datetime" class="text-dark mr-2">Time:</label>
+						<input id="datetime" name="dates" class="d-inline w-75 form-control" />
+					</div>
 					<a asp-action="Index" class="btn p-0">Back to list.</a>
 				</div>
 			</div>
@@ -69,15 +73,12 @@
 	</div>
 
 	@* List order *@
-	<div class="row"> 
+	<div class="row">
 
 		<div class="col-lg-12">
 			<div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
-				<div class="col-md-2 col-md-offset-2 demo">
-					<input type="text" value="12/11/2023 - 12/17/2023" id="demo" class="form-control text-center btn" />
-				</div>
 				<div>
-					<h4 class="mb-3">List Order</h4>
+					@* <h4 class="mb-3">List Order</h4> *@
 				</div>
 			</div>
 			<div class="col-lg-12">
@@ -131,3 +132,42 @@
 		</div>
 	</div>
 </div>
+@section Scripts {
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+	<script>
+		$('input[name="dates"]').daterangepicker({
+			alwaysShowCalendars: true,
+			locale: {
+				format: 'YYYY-MM-DD',
+			},
+			ranges: {
+				'Today': [moment(), moment()],
+				'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+				'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+				'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+				'This Month': [moment().startOf('month'), moment().endOf('month')],
+				'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+			},
+			startDate: moment().startOf('month'),
+			endDate: moment().endOf('month'),
+		}, getReport);
+
+		function getReport(start, end) {
+			const startTimestamp = moment(start).format("YYYYMMDDHHmmss");;
+			const endTimestamp = moment(end).format("YYYYMMDDHHmmss");;
+
+			const storeId = document.querySelector("#storeId").value
+
+			fetch(`/Report?store=${storeId}&start=${startTimestamp}&end=${endTimestamp}`).then(async (res) => {
+				const data = await res.json();
+				
+				console.log(data)
+			})
+
+		}
+
+	</script>
+}

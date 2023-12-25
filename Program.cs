@@ -67,7 +67,7 @@ namespace pos
 				});
 
 			//builder.Services.AddAuthorization
-			builder.Services.AddSingleton<MyDataService>();
+			builder.Services.AddScoped<MyDataService>();
 
 			builder.Services.AddSignalR();
 
