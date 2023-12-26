@@ -54,7 +54,16 @@
 								@foreach (var account in Model.Items)
 								{
 									<tr id="data-@account.Id">
-										<td class="text-center"><img class="rounded img-fluid avatar-40" src="/images/user/01.jpg" alt="profile" /></td>
+										@if (account.Avatar != null)
+										{
+											<td><img class="rounded img-fluid avatar-40" src="@account.Avatar" alt="profile" /></td>
+										}
+										else
+										{
+											<td><img class="rounded img-fluid avatar-40" src="/images/default/profile/user-1.png" alt="profile" /></td>
+
+										}
+
 										<td>@account.UserName</td>
 										<td>@account.PhoneNumber</td>
 										<td>@account.Email</td>
@@ -62,7 +71,9 @@
 											@if (account.Active)
 											{
 												<span class="btnStatus badge bg-success">Active</span>
-											}else{
+											}
+											else
+											{
 												<span class="btnStatus badge bg-danger">Locked</span>
 											}
 										</td>
@@ -107,7 +118,7 @@
 									@{
 										for (var i = 1; i <= Model.TotalPages; i++)
 										{
-												<li class=""><a class="page-link" href="?&page=@i">@i</a></li>
+											<li class=""><a class="page-link" href="?&page=@i">@i</a></li>
 										}
 									}
 									<li class="">

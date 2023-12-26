@@ -14,7 +14,7 @@ async function handleUpdateStatus(event) {
                 const data = await res.json();
                 console.log(data)
                 if (data.code == 0) {
-                    if (!data.status) {
+                    if (data.status) {
                         event.target.classList.remove("bg-danger");
                         event.target.classList.add("bg-success");
                         event.target.textContent = "Active";

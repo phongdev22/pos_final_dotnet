@@ -140,6 +140,18 @@
 	<script>
 		const convertVND = (x) => x.toLocaleString("it-IT", { style: "currency", currency: "VND" }).replace("VND", "đ");
 
+		const formatTime = function (timestamp) {
+			const dateObject = new Date(timestamp);
+
+			const day = dateObject.getDate().toString().padStart(2, '0');
+			const month = (dateObject.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based
+			const year = dateObject.getFullYear();
+
+			const formattedDate = `${day}-${month}-${year}`;
+
+			return formattedDate;
+		}
+
 		$('input[name="dates"]').daterangepicker({
 			alwaysShowCalendars: true,
 			locale: {
@@ -166,12 +178,11 @@
 
 			fetch(`/Report?store=${storeId}&start=${startTimestamp}&end=${endTimestamp}`).then(async (res) => {
 				const data = await res.json();
-
-				document.querySelector("#orderCount").text = data.data.Orders.length;
-				document.querySelector("#revenue").text = data.data.totalRevenuePerStore;
-				document.querySelector("#sold").text = data.data.totalProductsSold;
-
 				
+				document.querySelector("#orderCount").textContent = data.data.Orders.length ?? "0";
+				document.querySelector("#revenue").textContent = convertVND(data.data.TotalRevenuePerStore) ?? "0";
+				document.querySelector("#sold").textContent = data.data.TotalProductsSold ?? "0";
+
 				if (data.data.Orders) {
 					let html = "";
 					data.data.Orders.map(item => {
@@ -183,7 +194,7 @@
 										data-original-title="${item.OrderId}">
 										${item.OrderId}
 							</td>
-							<td>${item.DateCreation.toString("dd-MM-yyyy")}</td>
+							<td>${formatTime(item.DateCreation)}</td>
 							<td>${item.Customer.Name}</td>
 							<td>${convertVND(item.Total)}</td>
 							<td>${convertVND(item.GivenMoney)}</td>

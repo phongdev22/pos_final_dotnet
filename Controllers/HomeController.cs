@@ -6,6 +6,7 @@ using pos.Entities;
 using pos.Models;
 using pos.Models.Product;
 using System.Diagnostics;
+using System.Reflection.Metadata.Ecma335;
 
 namespace pos.Controllers
 {
@@ -21,6 +22,11 @@ namespace pos.Controllers
 		[Authorize]
 		public  IActionResult Index([FromQuery]string collection)
 		{
+			if (User.IsInRole("Admin"))
+			{
+				return RedirectToAction("Index", "RetailStores");
+			}
+
 			var categories = _context.Categories.ToList();
 			ViewBag.Categories = categories;
 
