@@ -10,12 +10,11 @@ namespace pos.Services
 		public string Email { get; set; }
 		public string Avatar { get; set; }
 		public string Name { get; set; }
-
 		public bool IsAdmin { get; set; }
 		public bool IsManager { get; set; }
 		public bool IsEmployee { get; set; }
 
-		public MyDataService(IHttpContextAccessor httpContextAccessor)
+		public MyDataService(IHttpContextAccessor httpContextAccessor)	
 		{
 			_context = httpContextAccessor;
 			GetData();
@@ -23,11 +22,11 @@ namespace pos.Services
 
 		public void GetData()
 		{
-            Email = _context.HttpContext.User.FindFirst(ClaimTypes.Name)?.Value ?? "";
+            Name = _context.HttpContext.User.FindFirst(ClaimTypes.Name)?.Value ?? "";
 
             Email = _context.HttpContext.User.FindFirst(ClaimTypes.Email)?.Value ?? "";
 
-			Name = _context.HttpContext.User.Identity.Name ?? "";
+			Username = _context.HttpContext.User.Identity.Name ?? "";
 
 			Avatar = _context.HttpContext.User.FindFirst(p => p.Type.Equals("Avatar"))?.Value ?? "";
 

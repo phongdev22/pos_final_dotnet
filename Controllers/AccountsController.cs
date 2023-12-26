@@ -230,10 +230,10 @@ namespace pos.Controllers
 					}
 				}
 
-				Helpers.ProcessUpload(avatar, $"{user.Id}.png", Path.Combine("wwwroot", "images", "user"));
+				Helpers.ProcessUpload(avatar, $"{current.Id}.png", Path.Combine("wwwroot", "images", "user"));
 
-				current.Avatar = $"/images/user/{user.Id}.png";
-				Response.Cookies.Append("AvatarPath", current.Avatar, new CookieOptions() { Expires = DateTime.Now.AddDays(1) });
+				current.Avatar = $"/images/user/{current.Id}.png";
+				// Response.Cookies.Append("AvatarPath", current.Avatar, new CookieOptions() { Expires = DateTime.Now.AddDays(1) });
 			}
 
 			current.FullName = user.FullName;

@@ -75,7 +75,7 @@ const renderCart = function () {
 };
 
 const handleAddToCart = function (event) {
-    const { id, name, price, stock } = event.target.dataset;
+    const { id, name, price, stock, inventory } = event.target.dataset;
 
     // const stock = parseInt(event.target.dataset.stock);
     if (parseInt(stock) === 0) {
@@ -89,11 +89,12 @@ const handleAddToCart = function (event) {
         price: parseFloat(price),
         quantity: 1,
         subtotal: parseFloat(price),
+        inventory: inventory,
         max: stock,
     };
 
     const cart = JSON.parse(localStorage.getItem("cart"));
-    const existingProduct = cart.find((item) => item.id === id);
+    const existingProduct = cart.find((item) => item.id === id && item.inventory === inventory);
 
     if (existingProduct) {
         existingProduct.quantity = Math.min(existingProduct.quantity + 1, stock);
@@ -106,25 +107,19 @@ const handleAddToCart = function (event) {
     updateTotal();
 };
 
-function existingInCart(id) {
-    const cart = JSON.parse(localStorage.getItem("cart"));
-    const existingProduct = cart.find((item) => item.id === id);
-    return existingProduct != null;
-}
-
 const createTrTable = function (index, product) {
     const trElement = document.createElement("tr");
-    trElement.setAttribute("id", "cart-" + product.id);
-    const { id, price, name, quantity, subtotal } = product;
+    const { id, name, quantity, subtotal, inventory } = product;
+    trElement.setAttribute("id", "cart-" + product.id + "-" + inventory);
 
     trElement.innerHTML = `
    <td class="text-center">
-      <span data-id="${id}" style="color:red; cursor:pointer" onclick="removeFromCart(this)">
+      <span data-id="${id}" data-inventory="${inventory}" style="color:red; cursor:pointer" onclick="removeFromCart(this)">
          <i class="ri-delete-bin-line mr-0"></i>
       </span>
    </td>
    <td class="product-name">${name}</td>
-   <td data-id="${id}" class="text-center" onclick="editQuantity(this)" >${quantity}</td>
+   <td data-id="${id}" data-inventory="${inventory}" class="text-center" onclick="editQuantity(this)" >${quantity}</td>
    <td class="subtotal text-center">${convertVND(subtotal)}</td>`;
     return trElement;
 };
@@ -134,16 +129,19 @@ const clearTable = function () {
 };
 
 const removeFromCart = function (button) {
-    let cart = JSON.parse(localStorage.getItem("cart"));
-    const { id } = button.dataset;
+    const cart = JSON.parse(localStorage.getItem("cart"));
+    const { id, inventory } = button.dataset;
 
-    const existingProduct = cart.find((item) => item.id === id );
+    const existingProduct = cart.findIndex((item) => {
+        if (item.id === id && item.inventory === inventory) {
+            return true
+        }
+        return false;
+    });
 
-    console.log(existingProduct)
-
-    if (existingProduct) {
-        cart = cart.filter((item) => item.id !== button.dataset.id);
-        document.querySelector(`#cart-${button.dataset.id}`).remove();
+    if (existingProduct != -1) {
+        cart.splice(existingProduct, 1);
+        document.querySelector(`#cart-${id}-${inventory}`).remove();
     }
 
     localStorage.setItem("cart", JSON.stringify(cart));
@@ -152,14 +150,14 @@ const removeFromCart = function (button) {
 
 const editQuantity = function (button) {
     const cart = JSON.parse(localStorage.getItem("cart"));
-    const { id } = button.dataset;
+    const { id, inventory } = button.dataset;
     const currentContent = button.innerText;
 
     const newContent = prompt("Edit content:", currentContent);
 
     if (newContent !== null) {
         button.innerText = newContent;
-        const existingProduct = cart.find((item) => item.id === id);
+        const existingProduct = cart.find((item) => item.id === id && item.inventory === inventory);
         existingProduct.quantity = Math.min(parseInt(newContent), existingProduct.max);
         existingProduct.subtotal = existingProduct.price * existingProduct.quantity;
     }
@@ -174,34 +172,3 @@ const updateTotal = function () {
     cart.forEach((item) => (total += item.subtotal));
     document.querySelector("#cart-total").textContent = `Total: ${convertVND(total)}`;
 };
-
-//function debounce(func, delay) {
-//    let timerId;
-
-//    return function () {
-//        const context = this;
-//        const args = arguments;
-
-//        clearTimeout(timerId);
-//        timerId = setTimeout(function () {
-//            func.apply(context, args);
-//        }, delay);
-//    };
-//}
-
-//async function getCusInfo(inputField) {
-//    const url = window.location.origin + "/customers/search?keyword=";
-//    const phone = inputField.value;
-//    if (phone) {
-//        await fetch(url + phone).then(async (res) => {
-//            const data = await res.json();
-//            console.log(data)
-//            if (data.code === 0) {
-//                document.querySelector("#name").value = data.customer.name;
-//                document.querySelector("#address").value = data.customer.address;
-//            }
-//        });
-//    }
-//}
-
-//const handleGetCusInfoDebounced = debounce(getCusInfo, 400);

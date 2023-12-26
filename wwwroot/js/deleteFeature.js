@@ -11,7 +11,7 @@ async function handleDelete(button) {
                document.querySelector(`#data-${id}`).remove();
             }
             if (result.code === 1) {
-               alert(`${result.message}`);
+               alert(`${result.Message}`);
             }
          })
          .catch((error) => console.log(error));
