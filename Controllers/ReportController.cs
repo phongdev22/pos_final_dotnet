@@ -48,15 +48,13 @@ namespace pos.Controllers
 
 				var DetailModel = new DetailStoreModel()
 				{
-					// RetailStore = await _context.RetailStores.FindAsync(store),
 					Orders = orders,
 					TotalProductsSold = totalProductsSold,
 					TotalRevenuePerStore = totalRevenuePerStore,
 					TopSpendingCustomer = topSpendingCustomer,
-					TopSellingUser = topSellingUser
 				};
 
-				return Ok(new { data = DetailModel});
+				return Ok(new { data = DetailModel, topSellingUser = new { name = topSellingUser?.FullName } });
 			}
 			else
 			{

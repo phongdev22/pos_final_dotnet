@@ -61,8 +61,15 @@ namespace pos.Controllers
                         authClaims.Add(new Claim("FirstLogin", user.FirstLogin.ToString()));
                     }
 
+                    var redirectController = "Home"; 
+
                     foreach (var userRole in userRoles)
                     {
+                        if (userRole.Equals("Admin"))
+                        {
+                            redirectController = "RetailStores";
+						};
+
                         authClaims.Add(new Claim(ClaimTypes.Role, userRole));
                     }
 
@@ -72,9 +79,9 @@ namespace pos.Controllers
 
                     await HttpContext.SignInAsync(principal);
 
-                    Response.Cookies.Append("AvatarPath", user.Avatar, new CookieOptions() { Expires = DateTime.Now.AddDays(1)});
+                    // Response.Cookies.Append("AvatarPath", user.Avatar, new CookieOptions() { Expires = DateTime.Now.AddDays(1)});
 
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Index", redirectController);
                 }
 
                 TempData["Message"] = "Please check your account again!";

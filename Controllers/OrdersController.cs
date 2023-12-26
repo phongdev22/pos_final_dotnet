@@ -57,8 +57,10 @@ namespace pos.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Create([FromBody] OrderModel orders)
 		{
-			var billerName = HttpContext.User.Identity.Name;
 
+			var billerName = HttpContext.User.Identity.Name;
+			
+			
 			var cusPhoneNumber = orders.Customer.PhoneNumber;
 			var customer = _context.Customer.FirstOrDefault(cus => cus.PhoneNumber.Equals(cusPhoneNumber));
 
@@ -90,7 +92,6 @@ namespace pos.Controllers
 				if (biller != null)
 				{
 					order.User = biller;
-					//order.RetailStore = biller.RetailStore;
 				}
 			}
 
@@ -107,6 +108,18 @@ namespace pos.Controllers
 					Order = order,
 					Product = product
 				};
+
+				// update quantity product main
+				product.Quantity = product.Quantity - od.Quantity;
+
+				// update product in inventory
+				var ivnentory = _context.Inventory.FirstOrDefault(inven => inven.ProductId == pId && inven.Id == detail.Inventory);
+				
+				if(ivnentory != null)
+				{
+					ivnentory.Quantity = ivnentory.Quantity - od.Quantity;
+				}
+
 				_context.OrderDetails.Add(od);
 				order.OrderDetails.Add(od);
 			}

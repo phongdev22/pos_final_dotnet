@@ -29,7 +29,7 @@
 							<div class="d-flex align-items-center mb-4 card-total-sale">
 								<div>
 									<p class="mb-2">Total Sales</p>
-									<h4>@Model.Orders.Count()</h4>
+									<h4 id="orderCount">@Model.Orders.Count()</h4>
 								</div>
 							</div>
 							<div class="iq-progress-bar mt-2">
@@ -44,7 +44,7 @@
 							<div class="d-flex align-items-center mb-4 card-total-sale">
 								<div>
 									<p class="mb-2">Total Revenue</p>
-									<h4>@Model.TotalRevenuePerStore.ToString("N0")đ</h4>
+									<h4 id="revenue">@Model.TotalRevenuePerStore.ToString("N0")đ</h4>
 								</div>
 							</div>
 							<div class="iq-progress-bar mt-2">
@@ -59,7 +59,7 @@
 							<div class="d-flex align-items-center mb-4 card-total-sale">
 								<div>
 									<p class="mb-2">Product Sold</p>
-									<h4>@Model.TotalProductsSold</h4>
+									<h4 id="sold">@Model.TotalProductsSold</h4>
 								</div>
 							</div>
 							<div class="iq-progress-bar mt-2">
@@ -78,7 +78,7 @@
 		<div class="col-lg-12">
 			<div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
 				<div>
-					@* <h4 class="mb-3">List Order</h4> *@
+					<h4 class="mb-3">List Order</h4>
 				</div>
 			</div>
 			<div class="col-lg-12">
@@ -111,8 +111,8 @@
 									<td>@order.Customer.Name</td>
 									<td>@order.Total.ToString("N0") đ</td>
 									<td>@order.GivenMoney.ToString("N0")đ</td>
-									<td>@order.User.NormalizedUserName</td>
-									<td>@order.User.NormalizedUserName</td>
+									<td>@((order.GivenMoney - order.Total).ToString("N0"))đ</td>
+									<td>@order.User.FullName</td>
 									<td class="text-center">
 										<a class="btn btn-sm badge badge-info mr-2"
 										   data-toggle="tooltip"
@@ -138,6 +138,8 @@
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 	<script>
+		const convertVND = (x) => x.toLocaleString("it-IT", { style: "currency", currency: "VND" }).replace("VND", "đ");
+
 		$('input[name="dates"]').daterangepicker({
 			alwaysShowCalendars: true,
 			locale: {
@@ -156,6 +158,7 @@
 		}, getReport);
 
 		function getReport(start, end) {
+			const dataTable = document.querySelector("#data-table");
 			const startTimestamp = moment(start).format("YYYYMMDDHHmmss");;
 			const endTimestamp = moment(end).format("YYYYMMDDHHmmss");;
 
@@ -163,10 +166,45 @@
 
 			fetch(`/Report?store=${storeId}&start=${startTimestamp}&end=${endTimestamp}`).then(async (res) => {
 				const data = await res.json();
-				
-				console.log(data)
-			})
 
+				document.querySelector("#orderCount").text = data.data.Orders.length;
+				document.querySelector("#revenue").text = data.data.totalRevenuePerStore;
+				document.querySelector("#sold").text = data.data.totalProductsSold;
+
+				
+				if (data.data.Orders) {
+					let html = "";
+					data.data.Orders.map(item => {
+						html += `<tr>
+							<td class="text text-truncate"
+								style="max-width:40px"
+								data-toggle="tooltip"
+								data-placement="top"
+										data-original-title="${item.OrderId}">
+										${item.OrderId}
+							</td>
+							<td>${item.DateCreation.toString("dd-MM-yyyy")}</td>
+							<td>${item.Customer.Name}</td>
+							<td>${convertVND(item.Total)}</td>
+							<td>${convertVND(item.GivenMoney)}</td>
+							<td>${(item.GivenMoney - item.Total)}</td>
+							<td>${data.topSellingUser.name}</td>
+							<td class="text-center">
+								<a class="btn btn-sm badge badge-info mr-2"
+								   data-toggle="tooltip"
+								   data-placement="top"
+								   title=""
+								   data-original-title="View"
+								   href="/Orders/Details/${item.OrderId}">
+								<i class="ri-eye-line mr-0"></i>
+								</a>
+							</td>
+						</tr>`
+					})
+
+					dataTable.innerHTML = html;
+				}
+			})
 		}
 
 	</script>
