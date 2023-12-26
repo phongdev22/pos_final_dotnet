@@ -23,9 +23,7 @@ namespace pos.Controllers
 			if (DateTime.TryParseExact(start, timestampFormat, null, DateTimeStyles.None, out DateTime startTime)
 				&& DateTime.TryParseExact(end, timestampFormat, null, DateTimeStyles.None, out DateTime endTime))
 			{
-				var orders = await _context.Orders.Where(order => order.DateCreation >= startTime && order.DateCreation <= endTime && order.User.RetailStoreId == store ).ToListAsync();
-
-
+				var orders = await _context.Orders.Where(order => order.DateCreation >= startTime && order.DateCreation <= endTime && order.User.RetailStoreId == store && order.Status).ToListAsync();
 
 				var totalProductsSold = orders
 				.SelectMany(o => o.OrderDetails)
