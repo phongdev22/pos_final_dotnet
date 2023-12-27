@@ -90,8 +90,19 @@ namespace pos.Controllers
 				// increase quantity head
 				existedProduct.Quantity = existedProduct.Quantity + product.Quantity;
 
+
+				var inventory = _context.Inventory.FirstOrDefault(inv => inv.ProductId == existedProduct.Id);
+
+				if(inventory != null)
+				{
+					inventory.Quantity = inventory.Quantity + product.Quantity;	
+				}
+				else
+				{
+					_context.Inventory.Add(new Inventory() { RetailStoreId = retailId, Quantity = product.Quantity, Product = existedProduct });
+				}
+
 				// add in an inventory
-				_context.Inventory.Add(new Inventory() { RetailStoreId = retailId, Quantity = product.Quantity, Product = existedProduct });
 				await _context.SaveChangesAsync();
 				return RedirectToAction("Index");
 			}
