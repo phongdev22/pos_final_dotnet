@@ -167,6 +167,7 @@
 
 		document.querySelector(".btn-view").addEventListener('click', function(event){
 			const { src } = this.dataset
+			document.querySelector("#preview-detail").src = "";
 			document.querySelector("#preview-detail").src = src;
 		})
 
