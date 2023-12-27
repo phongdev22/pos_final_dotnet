@@ -22,7 +22,25 @@ namespace pos.Controllers
 
 		public async Task<IActionResult> Index()
 		{
-			var orders = await _context.Orders.ToListAsync();
+			
+			var currentUserName = User.Identity.Name;
+
+			var orders = new List<Order>();
+
+			if (User.IsInRole("Admin"))
+			{
+				orders = await _context.Orders.ToListAsync();
+			}
+			else
+			{
+				var currentUser = await _userManager.FindByNameAsync(currentUserName);
+
+				if (currentUser != null)
+				{
+					orders = await _context.Orders.Where(o => o.User.RetailStoreId == currentUser.RetailStoreId).ToListAsync();
+				}
+			}
+
 			return View(orders);
 		}
 

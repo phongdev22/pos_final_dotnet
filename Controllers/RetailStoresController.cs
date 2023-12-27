@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using pos.Config;
 using pos.Entities;
 using pos.Models.Store;
@@ -10,11 +12,14 @@ namespace pos.Controllers
     public class RetailStoresController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager; 
 
-        public RetailStoresController(ApplicationDbContext context)
+        public RetailStoresController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
-        }
+			_userManager = userManager;
+
+		}
 
         // GET: RetailStores
         public async Task<IActionResult> Index()
@@ -25,11 +30,28 @@ namespace pos.Controllers
         // GET: RetailStores/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            var retailStore = await _context.RetailStores.FindAsync(id);
+            var orders = new List<Order>();
 
-            var orders = _context.Orders
-                .Where(or => or.User.RetailStoreId == id)
-                .ToList();
+            var retailId = id;
+
+            if(id == null)
+            {
+				var currentUserName = User.Identity.Name;
+				var currentUser = await _userManager.FindByNameAsync(currentUserName);
+                retailId = currentUser.RetailStoreId;
+
+                orders = _context.Orders
+                .Where(or => or.User.RetailStoreId == retailId).ToList();
+
+			}
+            else
+            {
+				orders = _context.Orders
+				.Where(or => or.User.RetailStoreId == id)
+				.ToList();
+			}
+
+            var retailStore = await _context.RetailStores.FindAsync(retailId);
 
             var totalProductsSold = orders
                 .SelectMany(o => o.OrderDetails)

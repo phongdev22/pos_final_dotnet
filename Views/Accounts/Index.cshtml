@@ -39,7 +39,7 @@
 							}
 						</style>
 
-						<table id="user-list-table" class="table table-striped dataTable mt-4" role="grid" aria-describedby="user-list-page-info">
+						<table id="user-list-table" class="table table-striped mt-4" role="grid" aria-describedby="user-list-page-info">
 							<thead>
 								<tr class="ligth">
 									<th>Profile</th>
@@ -56,7 +56,7 @@
 									<tr id="data-@account.Id">
 										@if (account.Avatar != null)
 										{
-											<td><img class="rounded img-fluid avatar-40" src="@account.Avatar" alt="profile" /></td>
+											<td><img class="rounded img-fluid avatar-40" src="@account.Avatar" alt="profile" style="object-fit:cover" /></td>
 										}
 										else
 										{
