@@ -41,15 +41,16 @@ namespace pos.Controllers
 
 			if (User.IsInRole("Manager"))
 			{
-				accounts = (await _userManager.GetUsersInRoleAsync("Employee")).Skip((page - 1) * PageSize)
-					.Take(PageSize).ToList();
-
+				
 				var currentUser = accounts.SingleOrDefault(u => u.NormalizedUserName.Equals(currentUserName.ToUpper()));
 
 				if (currentUser != null)
 				{
 					accounts.Remove(currentUser);
 				}
+
+				accounts = (await _userManager.GetUsersInRoleAsync("Employee")).Where(acc => acc.RetailStoreId == currentUser.RetailStoreId ).Skip((page - 1) * PageSize)
+					.Take(PageSize).ToList();
 			}
 
 			if (User.IsInRole("Admin"))
