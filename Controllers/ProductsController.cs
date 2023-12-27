@@ -163,19 +163,8 @@ namespace pos.Controllers
 				// Process image file
 				if (image != null)
 				{
-					if (!string.IsNullOrEmpty(_product.ImagePath) && !_product.ImagePath.Equals("/images/default/product/no-image.png"))
-					{
-						var oldFilePath = Path.Combine("wwwroot", _product.ImagePath.TrimStart('/'));
-
-						if (System.IO.File.Exists(oldFilePath))
-						{
-							System.IO.File.Delete(oldFilePath);
-						}
-					}
-
 					_product.ImagePath = $"/images/products/product-{_product.Id}.png";
 					Helpers.ProcessUpload(image, $"product-{_product.Id}.png", Path.Combine("wwwroot", "images", "products"));
-
 				}
 			}
 			await _context.SaveChangesAsync();

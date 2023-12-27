@@ -5,6 +5,8 @@ using pos.Entities;
 using pos.Models;
 using pos.Utils;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 
 namespace pos.Controllers
 {
@@ -35,9 +37,27 @@ namespace pos.Controllers
 		{
 			var currentUserName = User.Identity.Name;
 
-			var accounts = await _userManager.Users.AsQueryable().Where(c => !c.NormalizedUserName.Equals(currentUserName) && !c.NormalizedUserName.Equals("Admin"))
+			var accounts = new List<ApplicationUser>();
+
+			if (User.IsInRole("Manager"))
+			{
+				accounts = (await _userManager.GetUsersInRoleAsync("Employee")).Skip((page - 1) * PageSize)
+					.Take(PageSize).ToList();
+
+				var currentUser = accounts.SingleOrDefault(u => u.NormalizedUserName.Equals(currentUserName.ToUpper()));
+
+				if (currentUser != null)
+				{
+					accounts.Remove(currentUser);
+				}
+			}
+
+			if (User.IsInRole("Admin"))
+			{
+				accounts = await _userManager.Users.AsQueryable().Where(c => !c.NormalizedUserName.Equals(currentUserName) && !c.NormalizedUserName.Equals("Admin"))
 					.Skip((page - 1) * PageSize)
 					.Take(PageSize).ToListAsync();
+			}
 
 			var pageAccount = new PageViewModel<ApplicationUser>() { Items = accounts, PageNumber = page, PageSize = PageSize, TotalItems = accounts.Count };
 
@@ -233,6 +253,22 @@ namespace pos.Controllers
 				Helpers.ProcessUpload(avatar, $"{current.Id}.png", Path.Combine("wwwroot", "images", "user"));
 
 				current.Avatar = $"/images/user/{current.Id}.png";
+
+				var existingClaim = User.FindFirst("Avatar");
+
+				// Change avatar when upload 
+				if (existingClaim != null)
+				{
+					var newClaim = new Claim("Avatar", current.Avatar);
+
+					var identity = (ClaimsIdentity)HttpContext.User.Identity;
+					
+					identity.RemoveClaim(existingClaim);
+					identity.AddClaim(newClaim);
+
+					var principal = new ClaimsPrincipal(identity);
+					await HttpContext.SignInAsync(principal);
+				}
 				// Response.Cookies.Append("AvatarPath", current.Avatar, new CookieOptions() { Expires = DateTime.Now.AddDays(1) });
 			}
 

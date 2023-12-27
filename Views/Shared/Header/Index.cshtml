@@ -23,11 +23,19 @@
 				<a href="/Categories" class="btn text-uppercase btn-md mx-2">Categories</a>
 				<a href="/Customers" class="btn text-uppercase btn-md mx-2">Customers</a>
 				<a href="/Orders" class="btn text-uppercase btn-md mx-2">Orders</a>
-				@* <a href="/Reports" class="btn text-uppercase btn-md mx-2">Reports</a> *@
+
+				@if (IsManager || IsEmployee)
+				{
+					<a href="/RetailStores/Details" class="btn text-uppercase btn-md mx-2">Report</a>
+				}
+
+				@if (IsAdmin || IsManager)
+				{
+					<a href="/Accounts" class="btn text-uppercase btn-md mx-2">Accounts</a>
+				}
 
 				@if (IsAdmin)
 				{
-					<a href="/Accounts" class="btn text-uppercase btn-md mx-2">Accounts</a>
 					<a href="/RetailStores" class="btn text-uppercase btn-md mx-2">Stores</a>
 				}
 
@@ -131,6 +139,8 @@
 							<input type="text"
 								   id="phoneNumber"
 								   class="form-control"
+								   pattern="[0-9]{10}"
+								   required
 								   onkeyup="handleGetCusInfoDebounced(this)" />
 						</div>
 						<div class="d-flex align-items-center mb-2">
