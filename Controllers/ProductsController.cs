@@ -108,7 +108,8 @@ namespace pos.Controllers
 			}
 
 			product.CategoryId = categoryId;
-			var result = _context.Products.Add(product);
+			_context.Products.Add(product);
+			await _context.SaveChangesAsync();
 
 			// File Upload
 			if (image != null)

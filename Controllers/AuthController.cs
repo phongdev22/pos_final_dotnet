@@ -32,6 +32,11 @@ namespace pos.Controllers
         [HttpGet]
         public IActionResult Index()
         {
+            if (User.Identity.IsAuthenticated)
+            {
+                return Redirect("/Home");
+            }
+
             ViewData["Title"] = "POS | Login";
             ViewBag.Message = TempData["Message"];
             return View("Login");
