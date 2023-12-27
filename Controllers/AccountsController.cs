@@ -41,16 +41,16 @@ namespace pos.Controllers
 
 			if (User.IsInRole("Manager"))
 			{
-				
-				var currentUser = accounts.SingleOrDefault(u => u.NormalizedUserName.Equals(currentUserName.ToUpper()));
+
+				var currentUser = await _userManager.FindByNameAsync(currentUserName);
 
 				if (currentUser != null)
 				{
+					accounts = (await _userManager.GetUsersInRoleAsync("Employee")).Where(acc => acc.RetailStoreId == currentUser.RetailStoreId).Skip((page - 1) * PageSize)
+						.Take(PageSize).ToList();
 					accounts.Remove(currentUser);
 				}
 
-				accounts = (await _userManager.GetUsersInRoleAsync("Employee")).Where(acc => acc.RetailStoreId == currentUser.RetailStoreId ).Skip((page - 1) * PageSize)
-					.Take(PageSize).ToList();
 			}
 
 			if (User.IsInRole("Admin"))
@@ -61,7 +61,6 @@ namespace pos.Controllers
 			}
 
 			var pageAccount = new PageViewModel<ApplicationUser>() { Items = accounts, PageNumber = page, PageSize = PageSize, TotalItems = accounts.Count };
-
 			return View(pageAccount);
 		}
 
@@ -157,7 +156,7 @@ namespace pos.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Edit(string id, ApplicationUser appUser, [FromForm] string[] Roles, [FromForm] string password)
+		public async Task<IActionResult> Edit(string id, ApplicationUser appUser, [FromForm] string[] Roles, [FromForm] string password, [FromForm]int retailId)
 		{
 			var user = await _userManager.FindByIdAsync(id);
 
@@ -166,10 +165,10 @@ namespace pos.Controllers
 				return NotFound();
 			}
 
-			// Cập nhật thông tin người dùng từ dữ liệu nhập vào
 			user.PhoneNumber = appUser.PhoneNumber;
 			user.Email = appUser.Email;
 			user.Gender = appUser.Gender;
+			user.RetailStoreId = retailId;
 
 			if (!string.IsNullOrEmpty(password))
 			{
@@ -196,11 +195,11 @@ namespace pos.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> ChangeStatus([FromQuery]string id)
+		public async Task<IActionResult> ChangeStatus([FromQuery] string id)
 		{
 			var user = await _userManager.FindByIdAsync(id);
 
-			if(user == null) return Ok(new {code= 1, Message = "Cannot change Failed!" });
+			if (user == null) return Ok(new { code = 1, Message = "Cannot change Failed!" });
 
 			user.Active = !user.Active;
 
@@ -208,7 +207,7 @@ namespace pos.Controllers
 
 			if (updateResult.Succeeded)
 			{
-				return Ok(new {code = 0, Message = "Change Status Success!", status = user.Active});
+				return Ok(new { code = 0, Message = "Change Status Success!", status = user.Active });
 			}
 
 			return Ok(new { code = 1, Message = "Change Status Failed!" });
@@ -263,7 +262,7 @@ namespace pos.Controllers
 					var newClaim = new Claim("Avatar", current.Avatar);
 
 					var identity = (ClaimsIdentity)HttpContext.User.Identity;
-					
+
 					identity.RemoveClaim(existingClaim);
 					identity.AddClaim(newClaim);
 

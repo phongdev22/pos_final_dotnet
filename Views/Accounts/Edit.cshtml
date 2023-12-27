@@ -16,11 +16,11 @@
 				</div>
 				<div class="card-body">
 					<form method="post" asp-action="Edit" data-toggle="validator">
-						<input hidden asp-for="Id"/>
+						<input hidden asp-for="Id" />
 						<div class="row">
 							<div class="col-md-6">
 								<div class="form-group">
-									<label >Full Name</label>
+									<label>Full Name</label>
 									<input asp-for="FullName" type="text" class="form-control" placeholder="Enter Name" />
 									<div class="help-block with-errors"></div>
 								</div>
@@ -73,6 +73,27 @@
 									<label>New Password</label>
 									<input name="password" type="text" class="form-control" placeholder="Enter Password" onkeydown="(() => {document.querySelector('#message-error').textContent=''})()" />
 									<div class="help-block with-errors"></div>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="form-group">
+									<label>Store *</label>
+									<select name="retailId"
+											class="selectpicker form-control"
+											data-style="py-0" required>
+										<option value="">Select an inventory</option>
+										@foreach (var retail in ViewBag.Stores)
+										{
+											if (retail.Id == Model.RetailStoreId)
+											{
+												<option class="text-uppercase" value="@retail.Id" selected>@retail.StoreName</option>
+											}
+											else
+											{
+												<option class="text-uppercase" value="@retail.Id">@retail.StoreName</option>
+											}
+										}
+									</select>
 								</div>
 							</div>
 							<div class="col-md-6">

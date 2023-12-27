@@ -46,6 +46,7 @@
 									<th>Name</th>
 									<th>Contact</th>
 									<th>Email</th>
+									<th>Store</th>
 									<th>Status</th>
 									<th style="min-width: 100px">Action</th>
 								</tr>
@@ -67,6 +68,7 @@
 										<td>@account.UserName</td>
 										<td>@account.PhoneNumber</td>
 										<td>@account.Email</td>
+										<td>@(account?.RetailStore?.StoreName ?? "N/A")</td>
 										<td onclick="handleUpdateStatus(event)" data-id="@account.Id">
 											@if (account.Active)
 											{
